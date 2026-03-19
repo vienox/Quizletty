@@ -44,3 +44,6 @@ Thumbs.db
 .env.*
 appsettings.Local.json
 appsettings.*.local.json
+
+AGENTS.md
+DEVELOPMENT_PLAN.md
