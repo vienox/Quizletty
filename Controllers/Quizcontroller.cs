@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuizApp.Data;
 using QuizApp.Dtos;
-using QuizApp.Models;
 
 namespace QuizApp.Controllers;
 
@@ -39,7 +38,7 @@ public class QuizController : ControllerBase
     }
 
     [HttpPost("submit")]
-    public async Task<ActionResult> SubmitQuiz([FromBody] SubmitQuizDto dto)
+    public async Task<ActionResult<SubmitQuizResultDto>> SubmitQuiz([FromBody] SubmitQuizDto dto)
     {
         var questionIds = dto.Answers.Select(a => a.QuestionId).ToList();
 
@@ -62,11 +61,13 @@ public class QuizController : ControllerBase
             }
         }
 
-        return Ok(new
+        var result = new SubmitQuizResultDto
         {
             TotalQuestions = dto.Answers.Count,
             CorrectAnswers = correctAnswers,
             Score = $"{correctAnswers}/{dto.Answers.Count}"
-        });
+        };
+
+        return Ok(result);
     }
 }
