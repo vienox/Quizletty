@@ -1,6 +1,29 @@
 @QuizApp_HostAddress = http://localhost:5257
 
-GET {{QuizApp_HostAddress}}/weatherforecast/
+GET {{QuizApp_HostAddress}}/api/quiz/categories
 Accept: application/json
+
+###
+
+GET {{QuizApp_HostAddress}}/api/quiz/questions
+Accept: application/json
+
+###
+
+GET {{QuizApp_HostAddress}}/api/quiz/questions?category=Programming&limit=1&shuffle=true
+Accept: application/json
+
+###
+
+POST {{QuizApp_HostAddress}}/api/quiz/submit
+Content-Type: application/json
+
+{
+  "answers": [
+    { "questionId": 1, "answerId": 1 },
+    { "questionId": 2, "answerId": 5 },
+    { "questionId": 3, "answerId": 9 }
+  ]
+}
 
 ###
