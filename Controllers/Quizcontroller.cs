@@ -16,6 +16,18 @@ public class QuizController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("categories")]
+    public async Task<ActionResult<IEnumerable<string>>> GetCategories()
+    {
+        var categories = await _context.Questions
+            .Select(q => q.Category)
+            .Distinct()
+            .OrderBy(category => category)
+            .ToListAsync();
+
+        return Ok(categories);
+    }
+
     [HttpGet("questions")]
     public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions()
     {
@@ -27,6 +39,7 @@ public class QuizController : ControllerBase
         {
             Id = q.Id,
             Content = q.Content,
+            Category = q.Category,
             Answers = q.Answers.Select(a => new AnswerDto
             {
                 Id = a.Id,
