@@ -127,11 +127,19 @@ public class QuizController : ControllerBase
             }
         }
 
+        var totalQuestions = dto.Answers.Count;
+        var incorrectAnswers = totalQuestions - correctAnswers;
+        var percentage = totalQuestions == 0
+            ? 0
+            : Math.Round((double)correctAnswers / totalQuestions * 100, 2);
+
         var result = new SubmitQuizResultDto
         {
-            TotalQuestions = dto.Answers.Count,
+            TotalQuestions = totalQuestions,
             CorrectAnswers = correctAnswers,
-            Score = $"{correctAnswers}/{dto.Answers.Count}"
+            IncorrectAnswers = incorrectAnswers,
+            Percentage = percentage,
+            Score = $"{correctAnswers}/{totalQuestions}"
         };
 
         return Ok(result);
