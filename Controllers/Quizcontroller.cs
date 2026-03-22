@@ -20,6 +20,7 @@ public class QuizController : ControllerBase
     public async Task<ActionResult<IEnumerable<string>>> GetCategories()
     {
         var categories = await _context.Questions
+            .AsNoTracking()
             .Select(q => q.Category)
             .Distinct()
             .OrderBy(category => category)
@@ -29,11 +30,44 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("questions")]
-    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions()
+    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions(
+        [FromQuery] string? category,
+        [FromQuery] int? limit,
+        [FromQuery] bool shuffle = false)
     {
-        var questions = await _context.Questions
+        if (limit is <= 0)
+        {
+            return BadRequest("The limit query parameter must be greater than 0.");
+        }
+
+        var query = _context.Questions
+            .AsNoTracking()
             .Include(q => q.Answers)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            var normalizedCategory = category.Trim();
+            query = query.Where(q => q.Category == normalizedCategory);
+        }
+
+        var questions = await query
+            .OrderBy(q => q.Id)
             .ToListAsync();
+
+        if (shuffle)
+        {
+            questions = questions
+                .OrderBy(_ => Guid.NewGuid())
+                .ToList();
+        }
+
+        if (limit.HasValue)
+        {
+            questions = questions
+                .Take(limit.Value)
+                .ToList();
+        }
 
         var result = questions.Select(q => new QuestionDto
         {
