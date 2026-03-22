@@ -89,17 +89,36 @@ public class QuizController : ControllerBase
     {
         var questionIds = dto.Answers.Select(a => a.QuestionId).ToList();
 
+        if (questionIds.Count != questionIds.Distinct().Count())
+        {
+            ModelState.AddModelError(nameof(dto.Answers), "Each question can only be answered once.");
+            return ValidationProblem(ModelState);
+        }
+
         var questions = await _context.Questions
+            .AsNoTracking()
             .Include(q => q.Answers)
             .Where(q => questionIds.Contains(q.Id))
             .ToListAsync();
 
+        if (questions.Count != questionIds.Count)
+        {
+            ModelState.AddModelError(nameof(dto.Answers), "One or more question ids are invalid.");
+            return ValidationProblem(ModelState);
+        }
+
+        var questionsById = questions.ToDictionary(q => q.Id);
         int correctAnswers = 0;
 
         foreach (var userAnswer in dto.Answers)
         {
-            var question = questions.FirstOrDefault(q => q.Id == userAnswer.QuestionId);
-            if (question == null) continue;
+            var question = questionsById[userAnswer.QuestionId];
+
+            if (!question.Answers.Any(a => a.Id == userAnswer.AnswerId))
+            {
+                ModelState.AddModelError(nameof(dto.Answers), $"Answer id {userAnswer.AnswerId} does not belong to question id {userAnswer.QuestionId}.");
+                return ValidationProblem(ModelState);
+            }
 
             var correctAnswer = question.Answers.FirstOrDefault(a => a.IsCorrect);
             if (correctAnswer != null && correctAnswer.Id == userAnswer.AnswerId)
