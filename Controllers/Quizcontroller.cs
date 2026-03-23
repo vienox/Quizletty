@@ -69,19 +69,25 @@ public class QuizController : ControllerBase
                 .ToList();
         }
 
-        var result = questions.Select(q => new QuestionDto
-        {
-            Id = q.Id,
-            Content = q.Content,
-            Category = q.Category,
-            Answers = q.Answers.Select(a => new AnswerDto
-            {
-                Id = a.Id,
-                Content = a.Content
-            }).ToList()
-        });
+        var result = questions.Select(MapQuestion);
 
         return Ok(result);
+    }
+
+    [HttpGet("questions/{id:int}")]
+    public async Task<ActionResult<QuestionDto>> GetQuestionById(int id)
+    {
+        var question = await _context.Questions
+            .AsNoTracking()
+            .Include(q => q.Answers)
+            .SingleOrDefaultAsync(q => q.Id == id);
+
+        if (question == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(MapQuestion(question));
     }
 
     [HttpPost("submit")]
@@ -143,5 +149,20 @@ public class QuizController : ControllerBase
         };
 
         return Ok(result);
+    }
+
+    private static QuestionDto MapQuestion(Models.Question question)
+    {
+        return new QuestionDto
+        {
+            Id = question.Id,
+            Content = question.Content,
+            Category = question.Category,
+            Answers = question.Answers.Select(answer => new AnswerDto
+            {
+                Id = answer.Id,
+                Content = answer.Content
+            }).ToList()
+        };
     }
 }
