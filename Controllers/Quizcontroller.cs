@@ -29,6 +29,30 @@ public class QuizController : ControllerBase
         return Ok(categories);
     }
 
+    [HttpGet("stats")]
+    public async Task<ActionResult<QuizStatsDto>> GetQuizStats()
+    {
+        var categoryCounts = await _context.Questions
+            .AsNoTracking()
+            .GroupBy(q => q.Category)
+            .Select(group => new CategoryQuestionCountDto
+            {
+                Category = group.Key,
+                QuestionCount = group.Count()
+            })
+            .OrderBy(item => item.Category)
+            .ToListAsync();
+
+        var result = new QuizStatsDto
+        {
+            TotalQuestions = categoryCounts.Sum(item => item.QuestionCount),
+            TotalCategories = categoryCounts.Count,
+            Categories = categoryCounts
+        };
+
+        return Ok(result);
+    }
+
     [HttpGet("questions")]
     public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions(
         [FromQuery] string? category,
