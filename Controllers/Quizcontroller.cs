@@ -139,6 +139,7 @@ public class QuizController : ControllerBase
 
         var questionsById = questions.ToDictionary(q => q.Id);
         int correctAnswers = 0;
+        var review = new List<QuestionReviewDto>();
 
         foreach (var userAnswer in dto.Answers)
         {
@@ -150,11 +151,26 @@ public class QuizController : ControllerBase
                 return ValidationProblem(ModelState);
             }
 
+            var selectedAnswer = question.Answers.First(a => a.Id == userAnswer.AnswerId);
             var correctAnswer = question.Answers.FirstOrDefault(a => a.IsCorrect);
-            if (correctAnswer != null && correctAnswer.Id == userAnswer.AnswerId)
+            var isCorrect = correctAnswer != null && correctAnswer.Id == userAnswer.AnswerId;
+
+            if (isCorrect)
             {
                 correctAnswers++;
             }
+
+            review.Add(new QuestionReviewDto
+            {
+                QuestionId = question.Id,
+                QuestionContent = question.Content,
+                Category = question.Category,
+                SelectedAnswerId = selectedAnswer.Id,
+                SelectedAnswerContent = selectedAnswer.Content,
+                CorrectAnswerId = correctAnswer?.Id ?? 0,
+                CorrectAnswerContent = correctAnswer?.Content ?? string.Empty,
+                IsCorrect = isCorrect
+            });
         }
 
         var totalQuestions = dto.Answers.Count;
@@ -169,7 +185,8 @@ public class QuizController : ControllerBase
             CorrectAnswers = correctAnswers,
             IncorrectAnswers = incorrectAnswers,
             Percentage = percentage,
-            Score = $"{correctAnswers}/{totalQuestions}"
+            Score = $"{correctAnswers}/{totalQuestions}",
+            Review = review
         };
 
         return Ok(result);
