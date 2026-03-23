@@ -16,6 +16,10 @@ The API is exposed under `/api/quiz`.
 
 Returns the distinct quiz categories sorted alphabetically.
 
+### `GET /api/quiz/stats`
+
+Returns a high-level summary of the quiz bank, including total question count and question counts per category.
+
 ### `GET /api/quiz/questions`
 
 Returns quiz questions without exposing which answer is correct.
@@ -31,6 +35,10 @@ Example:
 ```text
 /api/quiz/questions?category=Science&limit=1&shuffle=true
 ```
+
+### `GET /api/quiz/questions/{id}`
+
+Returns a single question by id. Responds with `404 Not Found` when the question does not exist.
 
 ### `POST /api/quiz/submit`
 
@@ -62,6 +70,30 @@ Example response body:
   "correctAnswers": 2,
   "incorrectAnswers": 0,
   "percentage": 100,
-  "score": "2/2"
+  "score": "2/2",
+  "review": [
+    {
+      "questionId": 1,
+      "questionContent": "What is the capital of France?",
+      "category": "Geography",
+      "selectedAnswerId": 1,
+      "selectedAnswerContent": "Paris",
+      "correctAnswerId": 1,
+      "correctAnswerContent": "Paris",
+      "isCorrect": true
+    }
+  ],
+  "categories": [
+    {
+      "category": "Geography",
+      "totalQuestions": 1,
+      "correctAnswers": 1
+    },
+    {
+      "category": "Science",
+      "totalQuestions": 1,
+      "correctAnswers": 1
+    }
+  ]
 }
 ```

@@ -5,12 +5,22 @@ Accept: application/json
 
 ###
 
+GET {{QuizApp_HostAddress}}/api/quiz/stats
+Accept: application/json
+
+###
+
 GET {{QuizApp_HostAddress}}/api/quiz/questions
 Accept: application/json
 
 ###
 
 GET {{QuizApp_HostAddress}}/api/quiz/questions?category=Programming&limit=1&shuffle=true
+Accept: application/json
+
+###
+
+GET {{QuizApp_HostAddress}}/api/quiz/questions/1
 Accept: application/json
 
 ###
