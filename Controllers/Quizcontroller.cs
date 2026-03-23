@@ -178,6 +178,16 @@ public class QuizController : ControllerBase
         var percentage = totalQuestions == 0
             ? 0
             : Math.Round((double)correctAnswers / totalQuestions * 100, 2);
+        var categories = review
+            .GroupBy(item => item.Category)
+            .Select(group => new CategoryScoreDto
+            {
+                Category = group.Key,
+                TotalQuestions = group.Count(),
+                CorrectAnswers = group.Count(item => item.IsCorrect)
+            })
+            .OrderBy(item => item.Category)
+            .ToList();
 
         var result = new SubmitQuizResultDto
         {
@@ -186,7 +196,8 @@ public class QuizController : ControllerBase
             IncorrectAnswers = incorrectAnswers,
             Percentage = percentage,
             Score = $"{correctAnswers}/{totalQuestions}",
-            Review = review
+            Review = review,
+            Categories = categories
         };
 
         return Ok(result);
