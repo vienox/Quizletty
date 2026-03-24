@@ -133,6 +133,17 @@ select {
   margin-bottom: 1rem;
 }
 
+.status-chip {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(14, 118, 104, 0.1);
+  color: #0d5d54;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .field label {
   font-size: 0.88rem;
   font-weight: 700;
@@ -162,6 +173,12 @@ select {
 
 .primary-button:disabled {
   opacity: 0.5;
+}
+
+.helper-copy {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #775944;
 }
 
 .steps-list {
