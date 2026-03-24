@@ -25,6 +25,54 @@ export default function ResultStage({ onRestart, result }) {
         ))}
       </section>
 
+      <section className="result-detail-grid">
+        <article className="detail-card">
+          <div className="card-header">
+            <p className="eyebrow">Category split</p>
+            <h2>See where the score came from.</h2>
+          </div>
+
+          <div className="category-results">
+            {result.categories.map((category) => (
+              <article className="category-result-card" key={category.category}>
+                <p className="highlight-label">{category.category}</p>
+                <p className="highlight-value">
+                  {category.correctAnswers}/{category.totalQuestions}
+                </p>
+              </article>
+            ))}
+          </div>
+        </article>
+
+        <article className="detail-card">
+          <div className="card-header">
+            <p className="eyebrow">Answer review</p>
+            <h2>Every choice, checked against the key.</h2>
+          </div>
+
+          <div className="review-list">
+            {result.review.map((item) => (
+              <article className="review-item" key={item.questionId}>
+                <div className="review-topline">
+                  <p className="highlight-label">{item.category}</p>
+                  <span className={`review-status${item.isCorrect ? ' review-status-correct' : ' review-status-wrong'}`}>
+                    {item.isCorrect ? 'Correct' : 'Missed'}
+                  </span>
+                </div>
+
+                <h3>{item.questionContent}</h3>
+                <p className="review-copy">
+                  Your answer: <strong>{item.selectedAnswerContent}</strong>
+                </p>
+                <p className="review-copy">
+                  Correct answer: <strong>{item.correctAnswerContent}</strong>
+                </p>
+              </article>
+            ))}
+          </div>
+        </article>
+      </section>
+
       <button className="primary-button result-button" onClick={onRestart} type="button">
         Start another run
       </button>

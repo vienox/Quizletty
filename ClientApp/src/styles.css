@@ -142,6 +142,71 @@ select {
   gap: 1rem;
 }
 
+.result-detail-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1rem;
+}
+
+.detail-card {
+  padding: 1.75rem;
+  border-radius: 1.8rem;
+  background: rgba(255, 251, 246, 0.94);
+  border: 1px solid rgba(121, 73, 39, 0.12);
+  box-shadow: 0 1.5rem 4rem rgba(87, 48, 10, 0.12);
+}
+
+.category-results,
+.review-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.category-result-card,
+.review-item {
+  padding: 1rem 1.1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.review-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.review-status {
+  display: inline-flex;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.review-status-correct {
+  background: rgba(14, 118, 104, 0.1);
+  color: #0d5d54;
+}
+
+.review-status-wrong {
+  background: rgba(176, 57, 41, 0.12);
+  color: #8a2f26;
+}
+
+.review-item h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.review-copy {
+  font-size: 0.95rem;
+}
+
 .setup-card,
 .steps-card,
 .question-card {
@@ -384,7 +449,8 @@ p {
   .highlight-grid,
   .workspace-grid,
   .question-stage,
-  .result-metrics {
+  .result-metrics,
+  .result-detail-grid {
     grid-template-columns: 1fr;
   }
 }
