@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import QuestionStage from './components/QuestionStage.jsx';
-import { getCategories, getQuestions, getStats } from './api/quizApi.js';
+import ResultStage from './components/ResultStage.jsx';
+import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
 
 export default function App() {
   const [categories, setCategories] = useState([]);
@@ -15,6 +16,9 @@ export default function App() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [result, setResult] = useState(null);
 
   const steps = [
     'Pick a category or keep the full mix.',
@@ -91,6 +95,8 @@ export default function App() {
       setQuestions(questionItems);
       setAnswers({});
       setActiveQuestionIndex(0);
+      setResult(null);
+      setSubmitError('');
       setPhase('taking');
     } catch (error) {
       setQuestionError('Could not load questions for the selected setup.');
@@ -104,6 +110,28 @@ export default function App() {
       ...current,
       [questionId]: answerId
     }));
+  }
+
+  async function handleSubmitQuiz() {
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      const payload = {
+        answers: questions.map((question) => ({
+          questionId: question.id,
+          answerId: answers[question.id]
+        }))
+      };
+
+      const submissionResult = await submitQuiz(payload);
+      setResult(submissionResult);
+      setPhase('result');
+    } catch (error) {
+      setSubmitError('Could not score the quiz. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const currentQuestion = questions[activeQuestionIndex];
@@ -215,12 +243,28 @@ export default function App() {
           <QuestionStage
             activeIndex={activeQuestionIndex}
             answers={answers}
+            isSubmitting={isSubmitting}
             onBackToSetup={() => setPhase('setup')}
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
+            onSubmit={handleSubmitQuiz}
             question={currentQuestion}
+            submitError={submitError}
             totalQuestions={questions.length}
+          />
+        )}
+
+        {phase === 'result' && result && (
+          <ResultStage
+            onRestart={() => {
+              setPhase('setup');
+              setQuestions([]);
+              setAnswers({});
+              setResult(null);
+              setActiveQuestionIndex(0);
+            }}
+            result={result}
           />
         )}
       </section>

@@ -123,6 +123,25 @@ select {
   gap: 1rem;
 }
 
+.result-stage {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-hero {
+  padding: 2rem;
+  border-radius: 2rem;
+  background: rgba(255, 251, 246, 0.94);
+  border: 1px solid rgba(121, 73, 39, 0.12);
+  box-shadow: 0 1.5rem 4rem rgba(87, 48, 10, 0.12);
+}
+
+.result-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 .setup-card,
 .steps-card,
 .question-card {
@@ -303,6 +322,10 @@ select {
   font-weight: 700;
 }
 
+.result-button {
+  max-width: 18rem;
+}
+
 .steps-list {
   margin: 0;
   padding-left: 1.25rem;
@@ -360,7 +383,8 @@ p {
 @media (max-width: 900px) {
   .highlight-grid,
   .workspace-grid,
-  .question-stage {
+  .question-stage,
+  .result-metrics {
     grid-template-columns: 1fr;
   }
 }

@@ -1,16 +1,20 @@
 export default function QuestionStage({
   activeIndex,
   answers,
+  isSubmitting,
   onBackToSetup,
   onMoveNext,
   onMovePrevious,
   onSelectAnswer,
+  onSubmit,
   question,
+  submitError,
   totalQuestions
 }) {
   const selectedAnswerId = answers[question.id] ?? null;
   const answeredCount = Object.keys(answers).length;
   const isLastQuestion = activeIndex === totalQuestions - 1;
+  const isReadyToSubmit = answeredCount === totalQuestions;
 
   return (
     <section className="question-stage">
@@ -74,13 +78,23 @@ export default function QuestionStage({
 
             <button
               className="primary-button"
-              disabled={isLastQuestion}
-              onClick={onMoveNext}
+              disabled={isLastQuestion ? !isReadyToSubmit || isSubmitting : false}
+              onClick={isLastQuestion ? onSubmit : onMoveNext}
               type="button"
             >
-              {isLastQuestion ? 'Submit arrives next commit' : 'Next question'}
+              {isLastQuestion
+                ? isSubmitting
+                  ? 'Scoring quiz...'
+                  : 'Finish and score quiz'
+                : 'Next question'}
             </button>
           </div>
+
+          {!isReadyToSubmit && (
+            <p className="helper-copy">Answer every question to unlock the final score.</p>
+          )}
+
+          {submitError && <p className="error-copy">{submitError}</p>}
 
           <button className="ghost-button" onClick={onBackToSetup} type="button">
             Back to setup
