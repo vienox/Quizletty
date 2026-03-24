@@ -45,4 +45,11 @@ Thumbs.db
 appsettings.Local.json
 appsettings.*.local.json
 
+.dotnet/
+node_modules/
+ClientApp/node_modules/
+ClientApp/dist/
+npm-debug.log*
+.vite/
+
 .local-docs/
