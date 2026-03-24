@@ -1,12 +1,46 @@
 # Quizletty
 
-Small ASP.NET Core quiz API backed by SQLite. The app creates the database on startup and seeds a small question set the first time it runs.
+Quizletty is a small ASP.NET Core quiz API with a React frontend. The backend uses SQLite, creates the database on startup and seeds a small question set the first time it runs.
 
-## Run locally
+## Run the app
+
+The built React app is served by ASP.NET from `/`.
 
 ```bash
-dotnet run
+dotnet run --launch-profile https
 ```
+
+Open `https://localhost:7229/` for the quiz page.
+
+## Frontend workflow
+
+React source lives in `ClientApp/`. After frontend changes, rebuild the static assets that ASP.NET serves:
+
+```bash
+cd ClientApp
+npm install
+npm run build
+```
+
+For faster frontend iteration during development, run both servers in parallel:
+
+```bash
+dotnet run --launch-profile https
+cd ClientApp
+npm run dev
+```
+
+The Vite dev server proxies `/api/*` requests to `https://localhost:7229` by default. You can override that target with `QUIZ_API_URL`.
+
+## What the page does
+
+- loads quiz categories and stats from the API
+- lets you pick a category, question count and shuffled order
+- walks through the quiz one question at a time
+- submits the selected answers back to the API
+- shows the score, per-category breakdown and per-question review
+
+## API
 
 The API is exposed under `/api/quiz`.
 
