@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getCategories, getStats } from './api/quizApi.js';
+import QuestionStage from './components/QuestionStage.jsx';
+import { getCategories, getQuestions, getStats } from './api/quizApi.js';
 
 export default function App() {
   const [categories, setCategories] = useState([]);
@@ -8,6 +9,12 @@ export default function App() {
   const [questionLimit, setQuestionLimit] = useState(5);
   const [metaError, setMetaError] = useState('');
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [questionError, setQuestionError] = useState('');
+  const [phase, setPhase] = useState('setup');
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
   const steps = [
     'Pick a category or keep the full mix.',
@@ -67,6 +74,40 @@ export default function App() {
     }
   ];
 
+  const maxQuestions = selectedCategory === 'all'
+    ? stats?.totalQuestions ?? 1
+    : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
+
+  async function startSession() {
+    setIsLoadingQuestions(true);
+    setQuestionError('');
+
+    try {
+      const questionItems = await getQuestions({
+        category: selectedCategory,
+        limit: Math.min(questionLimit, maxQuestions)
+      });
+
+      setQuestions(questionItems);
+      setAnswers({});
+      setActiveQuestionIndex(0);
+      setPhase('taking');
+    } catch (error) {
+      setQuestionError('Could not load questions for the selected setup.');
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  }
+
+  function handleSelectAnswer(questionId, answerId) {
+    setAnswers((current) => ({
+      ...current,
+      [questionId]: answerId
+    }));
+  }
+
+  const currentQuestion = questions[activeQuestionIndex];
+
   return (
     <main className="app-shell">
       <div className="ambient ambient-left" />
@@ -95,71 +136,93 @@ export default function App() {
           ))}
         </section>
 
-        <section className="workspace-grid">
-          <article className="setup-card">
-            <div className="card-header">
-              <p className="eyebrow">Session setup</p>
-              <h2>Pick the shape of your run.</h2>
-            </div>
+        {phase === 'setup' && (
+          <section className="workspace-grid">
+            <article className="setup-card">
+              <div className="card-header">
+                <p className="eyebrow">Session setup</p>
+                <h2>Pick the shape of your run.</h2>
+              </div>
 
-            <p className="status-chip">
-              {isLoadingMeta ? 'Loading metadata...' : metaError || 'Metadata ready'}
-            </p>
+              <p className="status-chip">
+                {isLoadingMeta ? 'Loading metadata...' : metaError || 'Metadata ready'}
+              </p>
 
-            <div className="field">
-              <label htmlFor="category">Category</label>
-              <select
-                id="category"
-                value={selectedCategory}
-                onChange={(event) => setSelectedCategory(event.target.value)}
-                disabled={isLoadingMeta || metaError}
+              <div className="field">
+                <label htmlFor="category">Category</label>
+                <select
+                  id="category"
+                  value={selectedCategory}
+                  onChange={(event) => setSelectedCategory(event.target.value)}
+                  disabled={isLoadingMeta || !!metaError || isLoadingQuestions}
+                >
+                  <option value="all">All categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="field">
+                <label htmlFor="limit">Questions</label>
+                <input
+                  id="limit"
+                  type="number"
+                  min="1"
+                  max={maxQuestions}
+                  value={questionLimit}
+                  onChange={(event) => setQuestionLimit(Number(event.target.value))}
+                  disabled={isLoadingMeta || !!metaError || isLoadingQuestions}
+                />
+              </div>
+
+              <button
+                className="primary-button"
+                disabled={isLoadingMeta || !!metaError || isLoadingQuestions}
+                onClick={startSession}
+                type="button"
               >
-                <option value="all">All categories</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
+                {isLoadingQuestions ? 'Loading questions...' : 'Start quiz session'}
+              </button>
+
+              <p className="helper-copy">
+                Current choice: {selectedCategory === 'all' ? 'all categories' : selectedCategory}
+                {' / '}
+                {questionLimit} question{questionLimit === 1 ? '' : 's'}.
+              </p>
+
+              {questionError && <p className="error-copy">{questionError}</p>}
+            </article>
+
+            <article className="steps-card">
+              <div className="card-header">
+                <p className="eyebrow">Roadmap</p>
+                <h2>The full user path is already mapped.</h2>
+              </div>
+
+              <ol className="steps-list">
+                {steps.map((step) => (
+                  <li key={step}>{step}</li>
                 ))}
-              </select>
-            </div>
+              </ol>
+            </article>
+          </section>
+        )}
 
-            <div className="field">
-              <label htmlFor="limit">Questions</label>
-              <input
-                id="limit"
-                type="number"
-                min="1"
-                max={stats?.totalQuestions ?? 5}
-                value={questionLimit}
-                onChange={(event) => setQuestionLimit(Number(event.target.value))}
-                disabled={isLoadingMeta || !!metaError}
-              />
-            </div>
-
-            <button className="primary-button" type="button" disabled>
-              Question loading comes in the next commit
-            </button>
-
-            <p className="helper-copy">
-              Current choice: {selectedCategory === 'all' ? 'all categories' : selectedCategory}
-              {' / '}
-              {questionLimit} question{questionLimit === 1 ? '' : 's'}.
-            </p>
-          </article>
-
-          <article className="steps-card">
-            <div className="card-header">
-              <p className="eyebrow">Roadmap</p>
-              <h2>The full user path is already mapped.</h2>
-            </div>
-
-            <ol className="steps-list">
-              {steps.map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-          </article>
-        </section>
+        {phase === 'taking' && currentQuestion && (
+          <QuestionStage
+            activeIndex={activeQuestionIndex}
+            answers={answers}
+            onBackToSetup={() => setPhase('setup')}
+            onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
+            onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
+            onSelectAnswer={handleSelectAnswer}
+            question={currentQuestion}
+            totalQuestions={questions.length}
+          />
+        )}
       </section>
     </main>
   );
