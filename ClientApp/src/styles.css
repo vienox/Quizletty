@@ -306,6 +306,50 @@ select {
   margin-bottom: 1rem;
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(107, 77, 57, 0.1);
+}
+
+.toggle-copy {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #5b4332;
+}
+
+.toggle-row input {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.category-pill {
+  padding: 0.65rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(107, 77, 57, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  color: #5b4332;
+}
+
+.category-pill-active {
+  border-color: rgba(14, 118, 104, 0.58);
+  background: rgba(221, 247, 242, 0.92);
+  color: #0d5d54;
+}
+
 .status-chip {
   display: inline-flex;
   margin-bottom: 1rem;

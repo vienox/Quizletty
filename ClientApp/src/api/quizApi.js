@@ -26,7 +26,7 @@ export async function getStats() {
   return readJson(response);
 }
 
-export async function getQuestions({ category, limit }) {
+export async function getQuestions({ category, limit, shuffle }) {
   const params = new URLSearchParams();
 
   if (category && category !== 'all') {
@@ -35,6 +35,10 @@ export async function getQuestions({ category, limit }) {
 
   if (limit) {
     params.set('limit', String(limit));
+  }
+
+  if (shuffle) {
+    params.set('shuffle', 'true');
   }
 
   const response = await fetch(`/api/quiz/questions?${params.toString()}`, {

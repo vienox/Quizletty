@@ -8,6 +8,7 @@ export default function App() {
   const [stats, setStats] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [questionLimit, setQuestionLimit] = useState(5);
+  const [shuffleQuestions, setShuffleQuestions] = useState(true);
   const [metaError, setMetaError] = useState('');
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
@@ -82,6 +83,16 @@ export default function App() {
     ? stats?.totalQuestions ?? 1
     : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
 
+  useEffect(() => {
+    setQuestionLimit((current) => {
+      if (!maxQuestions) {
+        return current;
+      }
+
+      return Math.min(Math.max(current, 1), maxQuestions);
+    });
+  }, [maxQuestions]);
+
   async function startSession() {
     setIsLoadingQuestions(true);
     setQuestionError('');
@@ -89,7 +100,8 @@ export default function App() {
     try {
       const questionItems = await getQuestions({
         category: selectedCategory,
-        limit: Math.min(questionLimit, maxQuestions)
+        limit: Math.min(questionLimit, maxQuestions),
+        shuffle: shuffleQuestions
       });
 
       setQuestions(questionItems);
@@ -206,6 +218,40 @@ export default function App() {
                 />
               </div>
 
+              <div className="toggle-row">
+                <label className="toggle-copy" htmlFor="shuffle">
+                  Shuffle question order
+                </label>
+                <input
+                  checked={shuffleQuestions}
+                  disabled={isLoadingMeta || !!metaError || isLoadingQuestions}
+                  id="shuffle"
+                  onChange={(event) => setShuffleQuestions(event.target.checked)}
+                  type="checkbox"
+                />
+              </div>
+
+              <div className="category-pills">
+                <button
+                  className={`category-pill${selectedCategory === 'all' ? ' category-pill-active' : ''}`}
+                  onClick={() => setSelectedCategory('all')}
+                  type="button"
+                >
+                  All
+                </button>
+
+                {stats?.categories?.map((item) => (
+                  <button
+                    className={`category-pill${selectedCategory === item.category ? ' category-pill-active' : ''}`}
+                    key={item.category}
+                    onClick={() => setSelectedCategory(item.category)}
+                    type="button"
+                  >
+                    {item.category}
+                  </button>
+                ))}
+              </div>
+
               <button
                 className="primary-button"
                 disabled={isLoadingMeta || !!metaError || isLoadingQuestions}
@@ -218,7 +264,8 @@ export default function App() {
               <p className="helper-copy">
                 Current choice: {selectedCategory === 'all' ? 'all categories' : selectedCategory}
                 {' / '}
-                {questionLimit} question{questionLimit === 1 ? '' : 's'}.
+                {questionLimit} question{questionLimit === 1 ? '' : 's'}
+                {shuffleQuestions ? ' / shuffled' : ' / fixed order'}.
               </p>
 
               {questionError && <p className="error-copy">{questionError}</p>}
