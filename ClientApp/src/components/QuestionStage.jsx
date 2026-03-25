@@ -8,6 +8,7 @@ export default function QuestionStage({
   onSelectAnswer,
   onSubmit,
   question,
+  shortcutsEnabled,
   submitError,
   totalQuestions
 }) {
@@ -92,6 +93,12 @@ export default function QuestionStage({
 
           {!isReadyToSubmit && (
             <p className="helper-copy">Answer every question to unlock the final score.</p>
+          )}
+
+          {shortcutsEnabled && (
+            <p className="helper-copy">
+              Keyboard: use 1-9 to pick answers, arrows to move and Enter to submit on the final card.
+            </p>
           )}
 
           {submitError && <p className="error-copy">{submitError}</p>}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
@@ -161,6 +161,64 @@ export default function App() {
   }
 
   const currentQuestion = questions[activeQuestionIndex];
+  const answeredCount = Object.keys(answers).length;
+  const isLastQuestion = activeQuestionIndex === questions.length - 1;
+
+  const handleKeyboardShortcuts = useEffectEvent((event) => {
+    if (phase !== 'taking' || !currentQuestion) {
+      return;
+    }
+
+    const targetTagName = event.target instanceof HTMLElement ? event.target.tagName : '';
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(targetTagName)) {
+      return;
+    }
+
+    if (/^[1-9]$/.test(event.key)) {
+      const answerIndex = Number(event.key) - 1;
+      const answer = currentQuestion.answers[answerIndex];
+
+      if (answer) {
+        event.preventDefault();
+        handleSelectAnswer(currentQuestion.id, answer.id);
+      }
+
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && activeQuestionIndex > 0) {
+      event.preventDefault();
+      setActiveQuestionIndex((current) => current - 1);
+      return;
+    }
+
+    if (event.key === 'ArrowRight' && activeQuestionIndex < questions.length - 1) {
+      event.preventDefault();
+      setActiveQuestionIndex((current) => current + 1);
+      return;
+    }
+
+    if (event.key === 'Enter' && isLastQuestion && answeredCount === questions.length && !isSubmitting) {
+      event.preventDefault();
+      handleSubmitQuiz();
+    }
+  });
+
+  useEffect(() => {
+    if (phase !== 'taking') {
+      return undefined;
+    }
+
+    function onKeyDown(event) {
+      handleKeyboardShortcuts(event);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [phase]);
 
   return (
     <main className="app-shell">
@@ -315,6 +373,7 @@ export default function App() {
             onSelectAnswer={handleSelectAnswer}
             onSubmit={handleSubmitQuiz}
             question={currentQuestion}
+            shortcutsEnabled
             submitError={submitError}
             totalQuestions={questions.length}
           />
