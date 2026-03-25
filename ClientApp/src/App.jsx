@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
@@ -284,18 +285,22 @@ export default function App() {
               {questionError && <p className="error-copy">{questionError}</p>}
             </article>
 
-            <article className="steps-card">
-              <div className="card-header">
-                <p className="eyebrow">Roadmap</p>
-                <h2>The full user path is already mapped.</h2>
-              </div>
+            <div className="setup-side-column">
+              <article className="steps-card">
+                <div className="card-header">
+                  <p className="eyebrow">Roadmap</p>
+                  <h2>The full user path is already mapped.</h2>
+                </div>
 
-              <ol className="steps-list">
-                {steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </article>
+                <ol className="steps-list">
+                  {steps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              </article>
+
+              <RecentRunsPanel runs={recentRuns} />
+            </div>
           </section>
         )}
 
