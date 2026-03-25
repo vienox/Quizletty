@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
+import { loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 
 export default function App() {
   const [categories, setCategories] = useState([]);
@@ -20,6 +21,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [result, setResult] = useState(null);
+  const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
 
   const steps = [
     'Pick a category or keep the full mix.',
@@ -137,6 +139,17 @@ export default function App() {
       };
 
       const submissionResult = await submitQuiz(payload);
+      const historyEntry = {
+        id: `${Date.now()}`,
+        category: selectedCategory,
+        completedAt: new Date().toISOString(),
+        percentage: submissionResult.percentage,
+        questionCount: questions.length,
+        score: submissionResult.score,
+        shuffleQuestions
+      };
+
+      setRecentRuns(saveRecentRun(historyEntry));
       setResult(submissionResult);
       setPhase('result');
     } catch (error) {
