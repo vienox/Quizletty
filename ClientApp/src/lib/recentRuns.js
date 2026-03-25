@@ -21,3 +21,7 @@ export function saveRecentRun(run) {
   window.localStorage.setItem(storageKey, JSON.stringify(nextRuns));
   return nextRuns;
 }
+
+export function clearRecentRuns() {
+  window.localStorage.removeItem(storageKey);
+}

@@ -3,7 +3,7 @@ import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
-import { loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
+import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 
 export default function App() {
   const [categories, setCategories] = useState([]);
@@ -357,7 +357,13 @@ export default function App() {
                 </ol>
               </article>
 
-              <RecentRunsPanel runs={recentRuns} />
+              <RecentRunsPanel
+                onClear={() => {
+                  clearRecentRuns();
+                  setRecentRuns([]);
+                }}
+                runs={recentRuns}
+              />
             </div>
           </section>
         )}

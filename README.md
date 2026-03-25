@@ -39,6 +39,8 @@ The Vite dev server proxies `/api/*` requests to `https://localhost:7229` by def
 - walks through the quiz one question at a time
 - submits the selected answers back to the API
 - shows the score, per-category breakdown and per-question review
+- stores the latest runs in browser storage and shows them on the setup screen
+- supports keyboard shortcuts during the quiz: `1-9` to pick, arrows to move, `Enter` to submit on the last card
 
 ## API
 
