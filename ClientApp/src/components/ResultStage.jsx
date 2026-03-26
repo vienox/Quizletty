@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function ResultStage({ onRestart, result }) {
   const [reviewFilter, setReviewFilter] = useState('all');
+  const [copyState, setCopyState] = useState('idle');
   const metrics = [
     { label: 'Correct', value: result.correctAnswers },
     { label: 'Incorrect', value: result.incorrectAnswers },
@@ -23,6 +24,25 @@ export default function ResultStage({ onRestart, result }) {
 
     return true;
   });
+
+  async function copySummary() {
+    const lines = [
+      `Quizletty result: ${result.score} (${result.percentage}%)`,
+      `Correct: ${result.correctAnswers}`,
+      `Incorrect: ${result.incorrectAnswers}`,
+      'Category split:',
+      ...result.categories.map((category) => (
+        `- ${category.category}: ${category.correctAnswers}/${category.totalQuestions}`
+      ))
+    ];
+
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    }
+  }
 
   return (
     <section className="result-stage">
@@ -113,9 +133,19 @@ export default function ResultStage({ onRestart, result }) {
         </article>
       </section>
 
-      <button className="primary-button result-button" onClick={onRestart} type="button">
-        Start another run
-      </button>
+      <div className="result-actions">
+        <button className="primary-button result-button" onClick={onRestart} type="button">
+          Start another run
+        </button>
+
+        <button className="ghost-button result-button" onClick={copySummary} type="button">
+          {copyState === 'copied'
+            ? 'Summary copied'
+            : copyState === 'failed'
+              ? 'Copy failed'
+              : 'Copy score summary'}
+        </button>
+      </div>
     </section>
   );
 }
