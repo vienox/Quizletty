@@ -1,9 +1,28 @@
+import { useState } from 'react';
+
 export default function ResultStage({ onRestart, result }) {
+  const [reviewFilter, setReviewFilter] = useState('all');
   const metrics = [
     { label: 'Correct', value: result.correctAnswers },
     { label: 'Incorrect', value: result.incorrectAnswers },
     { label: 'Accuracy', value: `${result.percentage}%` }
   ];
+  const reviewCounts = {
+    all: result.review.length,
+    correct: result.review.filter((item) => item.isCorrect).length,
+    missed: result.review.filter((item) => !item.isCorrect).length
+  };
+  const visibleReview = result.review.filter((item) => {
+    if (reviewFilter === 'correct') {
+      return item.isCorrect;
+    }
+
+    if (reviewFilter === 'missed') {
+      return !item.isCorrect;
+    }
+
+    return true;
+  });
 
   return (
     <section className="result-stage">
@@ -50,8 +69,25 @@ export default function ResultStage({ onRestart, result }) {
             <h2>Every choice, checked against the key.</h2>
           </div>
 
+          <div className="filter-pills">
+            {[
+              ['all', 'All'],
+              ['correct', 'Correct'],
+              ['missed', 'Missed']
+            ].map(([value, label]) => (
+              <button
+                className={`category-pill${reviewFilter === value ? ' category-pill-active' : ''}`}
+                key={value}
+                onClick={() => setReviewFilter(value)}
+                type="button"
+              >
+                {label} ({reviewCounts[value]})
+              </button>
+            ))}
+          </div>
+
           <div className="review-list">
-            {result.review.map((item) => (
+            {visibleReview.map((item) => (
               <article className="review-item" key={item.questionId}>
                 <div className="review-topline">
                   <p className="highlight-label">{item.category}</p>
@@ -70,6 +106,10 @@ export default function ResultStage({ onRestart, result }) {
               </article>
             ))}
           </div>
+
+          {visibleReview.length === 0 && (
+            <p className="helper-copy">No answers match the active review filter.</p>
+          )}
         </article>
       </section>
 
