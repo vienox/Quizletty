@@ -3,7 +3,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
   timeStyle: 'short'
 });
 
-export default function ResumeDraftCard({ draft, onResume }) {
+export default function ResumeDraftCard({ draft, onDiscard, onResume }) {
   const answeredCount = Object.keys(draft.answers ?? {}).length;
   const flaggedCount = Object.keys(draft.flaggedQuestions ?? {}).length;
 
@@ -29,9 +29,15 @@ export default function ResumeDraftCard({ draft, onResume }) {
         {draft.savedAt ? dateFormatter.format(new Date(draft.savedAt)) : 'recently'}.
       </p>
 
-      <button className="primary-button" onClick={onResume} type="button">
-        Resume saved quiz
-      </button>
+      <div className="result-actions">
+        <button className="primary-button result-button" onClick={onResume} type="button">
+          Resume saved quiz
+        </button>
+
+        <button className="ghost-button result-button" onClick={onDiscard} type="button">
+          Discard draft
+        </button>
+      </div>
     </article>
   );
 }

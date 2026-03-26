@@ -436,6 +436,10 @@ export default function App() {
               {savedDraft && (
                 <ResumeDraftCard
                   draft={savedDraft}
+                  onDiscard={() => {
+                    clearSessionDraft();
+                    setSavedDraft(null);
+                  }}
                   onResume={resumeSavedDraft}
                 />
               )}
