@@ -36,7 +36,9 @@ The Vite dev server proxies `/api/*` requests to `https://localhost:7229` by def
 
 - loads quiz categories and stats from the API
 - remembers setup choices like category, limit and shuffle mode in browser storage
+- autosaves an unfinished quiz session in browser storage while you are solving
 - lets you pick a category, question count and shuffled order
+- lets you resume or discard a saved draft from the setup screen
 - walks through the quiz one question at a time
 - shows a live session overview, question navigator and review flags while you answer
 - submits the selected answers back to the API

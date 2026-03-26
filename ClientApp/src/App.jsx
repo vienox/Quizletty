@@ -323,7 +323,7 @@ export default function App() {
 
           <p className="masthead-copy">
             The React client now covers the whole quiz flow, from saved setup
-            preferences and live question navigation to scored results with
+            preferences and resumable quiz drafts to scored results with
             shareable summaries.
           </p>
         </header>

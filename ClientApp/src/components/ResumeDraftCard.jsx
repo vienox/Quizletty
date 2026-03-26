@@ -29,6 +29,10 @@ export default function ResumeDraftCard({ draft, onDiscard, onResume }) {
         {draft.savedAt ? dateFormatter.format(new Date(draft.savedAt)) : 'recently'}.
       </p>
 
+      <p className="helper-copy">
+        Resume keeps the previous answers, active question and review flags intact.
+      </p>
+
       <div className="result-actions">
         <button className="primary-button result-button" onClick={onResume} type="button">
           Resume saved quiz
