@@ -3,14 +3,16 @@ import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
+import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 
 export default function App() {
+  const [storedPreferences] = useState(() => loadQuizPreferences());
   const [categories, setCategories] = useState([]);
   const [stats, setStats] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [questionLimit, setQuestionLimit] = useState(5);
-  const [shuffleQuestions, setShuffleQuestions] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState(storedPreferences.selectedCategory);
+  const [questionLimit, setQuestionLimit] = useState(storedPreferences.questionLimit);
+  const [shuffleQuestions, setShuffleQuestions] = useState(storedPreferences.shuffleQuestions);
   const [metaError, setMetaError] = useState('');
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
@@ -46,7 +48,13 @@ export default function App() {
 
         setCategories(categoryItems);
         setStats(statsResponse);
-        setQuestionLimit(Math.min(statsResponse.totalQuestions || 5, 5));
+
+        const hasStoredCategory = storedPreferences.selectedCategory === 'all'
+          || categoryItems.includes(storedPreferences.selectedCategory);
+
+        if (!hasStoredCategory) {
+          setSelectedCategory('all');
+        }
       } catch (error) {
         if (!isActive) {
           return;
@@ -95,6 +103,14 @@ export default function App() {
       return Math.min(Math.max(current, 1), maxQuestions);
     });
   }, [maxQuestions]);
+
+  useEffect(() => {
+    saveQuizPreferences({
+      questionLimit,
+      selectedCategory,
+      shuffleQuestions
+    });
+  }, [questionLimit, selectedCategory, shuffleQuestions]);
 
   async function startSession() {
     setIsLoadingQuestions(true);
