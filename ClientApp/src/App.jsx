@@ -5,6 +5,7 @@ import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
+import { clearSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
@@ -113,6 +114,34 @@ export default function App() {
     });
   }, [questionLimit, selectedCategory, shuffleQuestions]);
 
+  useEffect(() => {
+    if (phase !== 'taking' || questions.length === 0) {
+      return;
+    }
+
+    saveSessionDraft({
+      activeQuestionIndex,
+      answers,
+      flaggedQuestions,
+      questions,
+      savedAt: new Date().toISOString(),
+      settings: {
+        questionLimit,
+        selectedCategory,
+        shuffleQuestions
+      }
+    });
+  }, [
+    activeQuestionIndex,
+    answers,
+    flaggedQuestions,
+    phase,
+    questionLimit,
+    questions,
+    selectedCategory,
+    shuffleQuestions
+  ]);
+
   async function startSession() {
     setIsLoadingQuestions(true);
     setQuestionError('');
@@ -183,6 +212,7 @@ export default function App() {
       };
 
       setRecentRuns(saveRecentRun(historyEntry));
+      clearSessionDraft();
       setResult(submissionResult);
       setPhase('result');
     } catch (error) {
