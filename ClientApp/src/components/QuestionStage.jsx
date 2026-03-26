@@ -1,6 +1,7 @@
 export default function QuestionStage({
   activeIndex,
   answers,
+  flaggedQuestions,
   isSubmitting,
   onJumpToQuestion,
   onBackToSetup,
@@ -8,6 +9,7 @@ export default function QuestionStage({
   onMovePrevious,
   onSelectAnswer,
   onSubmit,
+  onToggleFlag,
   questions,
   question,
   sessionSettings,
@@ -19,6 +21,7 @@ export default function QuestionStage({
   const answeredCount = Object.keys(answers).length;
   const isLastQuestion = activeIndex === totalQuestions - 1;
   const isReadyToSubmit = answeredCount === totalQuestions;
+  const isFlagged = Boolean(flaggedQuestions[question.id]);
 
   return (
     <section className="question-stage">
@@ -84,6 +87,11 @@ export default function QuestionStage({
               <p className="highlight-label">Remaining</p>
               <p className="session-meta-value">{totalQuestions - answeredCount}</p>
             </article>
+
+            <article className="session-meta-card">
+              <p className="highlight-label">Flagged</p>
+              <p className="session-meta-value">{sessionSettings.flaggedCount}</p>
+            </article>
           </div>
 
           <div className="progress-bar" aria-hidden="true">
@@ -97,10 +105,11 @@ export default function QuestionStage({
             {questions.map((item, index) => {
               const isAnswered = answers[item.id] !== undefined;
               const isActive = item.id === question.id;
+              const isItemFlagged = Boolean(flaggedQuestions[item.id]);
 
               return (
                 <button
-                  className={`navigator-pill${isAnswered ? ' navigator-pill-answered' : ''}${isActive ? ' navigator-pill-active' : ''}`}
+                  className={`navigator-pill${isAnswered ? ' navigator-pill-answered' : ''}${isItemFlagged ? ' navigator-pill-flagged' : ''}${isActive ? ' navigator-pill-active' : ''}`}
                   key={item.id}
                   onClick={() => onJumpToQuestion(index)}
                   type="button"
@@ -135,13 +144,17 @@ export default function QuestionStage({
             </button>
           </div>
 
+          <button className="ghost-button" onClick={() => onToggleFlag(question.id)} type="button">
+            {isFlagged ? 'Remove review flag' : 'Mark question for review'}
+          </button>
+
           {!isReadyToSubmit && (
             <p className="helper-copy">Answer every question to unlock the final score.</p>
           )}
 
           {shortcutsEnabled && (
             <p className="helper-copy">
-              Keyboard: use 1-9 to pick answers, arrows to move and Enter to submit on the final card.
+              Keyboard: use 1-9 to pick answers, arrows to move, F to flag and Enter to submit on the final card.
             </p>
           )}
 

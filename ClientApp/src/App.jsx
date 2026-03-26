@@ -20,6 +20,7 @@ export default function App() {
   const [phase, setPhase] = useState('setup');
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
+  const [flaggedQuestions, setFlaggedQuestions] = useState({});
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -125,6 +126,7 @@ export default function App() {
 
       setQuestions(questionItems);
       setAnswers({});
+      setFlaggedQuestions({});
       setActiveQuestionIndex(0);
       setResult(null);
       setSubmitError('');
@@ -141,6 +143,20 @@ export default function App() {
       ...current,
       [questionId]: answerId
     }));
+  }
+
+  function toggleQuestionFlag(questionId) {
+    setFlaggedQuestions((current) => {
+      const nextFlags = { ...current };
+
+      if (nextFlags[questionId]) {
+        delete nextFlags[questionId];
+      } else {
+        nextFlags[questionId] = true;
+      }
+
+      return nextFlags;
+    });
   }
 
   async function handleSubmitQuiz() {
@@ -217,6 +233,12 @@ export default function App() {
     if (event.key === 'Enter' && isLastQuestion && answeredCount === questions.length && !isSubmitting) {
       event.preventDefault();
       handleSubmitQuiz();
+      return;
+    }
+
+    if (event.key.toLowerCase() === 'f') {
+      event.preventDefault();
+      toggleQuestionFlag(currentQuestion.id);
     }
   });
 
@@ -388,6 +410,7 @@ export default function App() {
           <QuestionStage
             activeIndex={activeQuestionIndex}
             answers={answers}
+            flaggedQuestions={flaggedQuestions}
             isSubmitting={isSubmitting}
             onJumpToQuestion={setActiveQuestionIndex}
             onBackToSetup={() => setPhase('setup')}
@@ -395,9 +418,11 @@ export default function App() {
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
             onSubmit={handleSubmitQuiz}
+            onToggleFlag={toggleQuestionFlag}
             questions={questions}
             question={currentQuestion}
             sessionSettings={{
+              flaggedCount: Object.keys(flaggedQuestions).length,
               selectedCategory,
               shuffleQuestions
             }}
@@ -413,6 +438,7 @@ export default function App() {
               setPhase('setup');
               setQuestions([]);
               setAnswers({});
+              setFlaggedQuestions({});
               setResult(null);
               setActiveQuestionIndex(0);
             }}
