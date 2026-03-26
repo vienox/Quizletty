@@ -1,11 +1,12 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
+import ResumeDraftCard from './components/ResumeDraftCard.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
-import { clearSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
+import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
@@ -27,6 +28,7 @@ export default function App() {
   const [submitError, setSubmitError] = useState('');
   const [result, setResult] = useState(null);
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
+  const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
 
   const steps = [
     'Pick a category or keep the full mix.',
@@ -131,6 +133,7 @@ export default function App() {
         shuffleQuestions
       }
     });
+    setSavedDraft(loadSessionDraft());
   }, [
     activeQuestionIndex,
     answers,
@@ -188,6 +191,23 @@ export default function App() {
     });
   }
 
+  function resumeSavedDraft() {
+    if (!savedDraft) {
+      return;
+    }
+
+    setSelectedCategory(savedDraft.settings?.selectedCategory ?? 'all');
+    setQuestionLimit(savedDraft.settings?.questionLimit ?? savedDraft.questions.length);
+    setShuffleQuestions(savedDraft.settings?.shuffleQuestions ?? true);
+    setQuestions(savedDraft.questions);
+    setAnswers(savedDraft.answers ?? {});
+    setFlaggedQuestions(savedDraft.flaggedQuestions ?? {});
+    setActiveQuestionIndex(savedDraft.activeQuestionIndex ?? 0);
+    setResult(null);
+    setSubmitError('');
+    setPhase('taking');
+  }
+
   async function handleSubmitQuiz() {
     setIsSubmitting(true);
     setSubmitError('');
@@ -213,6 +233,7 @@ export default function App() {
 
       setRecentRuns(saveRecentRun(historyEntry));
       clearSessionDraft();
+      setSavedDraft(null);
       setResult(submissionResult);
       setPhase('result');
     } catch (error) {
@@ -412,6 +433,13 @@ export default function App() {
             </article>
 
             <div className="setup-side-column">
+              {savedDraft && (
+                <ResumeDraftCard
+                  draft={savedDraft}
+                  onResume={resumeSavedDraft}
+                />
+              )}
+
               <article className="steps-card">
                 <div className="card-header">
                   <p className="eyebrow">Roadmap</p>

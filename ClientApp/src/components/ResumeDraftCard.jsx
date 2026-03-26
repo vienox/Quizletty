@@ -1,0 +1,37 @@
+const dateFormatter = new Intl.DateTimeFormat('en', {
+  dateStyle: 'medium',
+  timeStyle: 'short'
+});
+
+export default function ResumeDraftCard({ draft, onResume }) {
+  const answeredCount = Object.keys(draft.answers ?? {}).length;
+  const flaggedCount = Object.keys(draft.flaggedQuestions ?? {}).length;
+
+  return (
+    <article className="steps-card">
+      <div className="card-header">
+        <p className="eyebrow">Saved draft</p>
+        <h2>There is an unfinished quiz ready to resume.</h2>
+      </div>
+
+      <p className="helper-copy">
+        {draft.settings?.selectedCategory === 'all'
+          ? 'All categories'
+          : draft.settings?.selectedCategory ?? 'Mixed run'}
+        {' / '}
+        {draft.questions.length} question{draft.questions.length === 1 ? '' : 's'}
+        {' / '}
+        {draft.settings?.shuffleQuestions ? 'shuffled' : 'fixed order'}
+      </p>
+
+      <p className="helper-copy">
+        {answeredCount} answered, {flaggedCount} flagged, saved{' '}
+        {draft.savedAt ? dateFormatter.format(new Date(draft.savedAt)) : 'recently'}.
+      </p>
+
+      <button className="primary-button" onClick={onResume} type="button">
+        Resume saved quiz
+      </button>
+    </article>
+  );
+}
