@@ -50,8 +50,8 @@ export default function ResultStage({ onRestart, result }) {
         <p className="eyebrow">Session complete</p>
         <h2>{result.score} on the board.</h2>
         <p className="helper-copy">
-          The quiz run is now scored live against the API. Next commit will add
-          the detailed answer review and category breakdown.
+          The run is fully scored against the API and ready for a detailed
+          review, category analysis or quick summary sharing.
         </p>
       </article>
 

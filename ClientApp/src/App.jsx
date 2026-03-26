@@ -271,9 +271,9 @@ export default function App() {
           </div>
 
           <p className="masthead-copy">
-            A dedicated quiz page now reads live metadata from the ASP.NET API.
-            Next up: loading questions, answering them and scoring the session
-            end to end.
+            The React client now covers the whole quiz flow, from saved setup
+            preferences and live question navigation to scored results with
+            shareable summaries.
           </p>
         </header>
 

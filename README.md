@@ -35,12 +35,17 @@ The Vite dev server proxies `/api/*` requests to `https://localhost:7229` by def
 ## What the page does
 
 - loads quiz categories and stats from the API
+- remembers setup choices like category, limit and shuffle mode in browser storage
 - lets you pick a category, question count and shuffled order
 - walks through the quiz one question at a time
+- shows a live session overview, question navigator and review flags while you answer
 - submits the selected answers back to the API
 - shows the score, per-category breakdown and per-question review
+- lets you filter review cards by correct vs missed answers
+- lets you copy a compact score summary to the clipboard
 - stores the latest runs in browser storage and shows them on the setup screen
 - supports keyboard shortcuts during the quiz: `1-9` to pick, arrows to move, `Enter` to submit on the last card
+- supports `F` while solving to flag the current question for later review
 
 ## API
 
