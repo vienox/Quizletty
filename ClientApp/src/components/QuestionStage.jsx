@@ -8,6 +8,7 @@ export default function QuestionStage({
   onSelectAnswer,
   onSubmit,
   question,
+  sessionSettings,
   shortcutsEnabled,
   submitError,
   totalQuestions
@@ -58,6 +59,29 @@ export default function QuestionStage({
           <div className="card-header">
             <p className="eyebrow">Session status</p>
             <h2>Move through the full run at your own pace.</h2>
+          </div>
+
+          <div className="session-meta-grid">
+            <article className="session-meta-card">
+              <p className="highlight-label">Category</p>
+              <p className="session-meta-value">
+                {sessionSettings.selectedCategory === 'all'
+                  ? 'Mixed run'
+                  : sessionSettings.selectedCategory}
+              </p>
+            </article>
+
+            <article className="session-meta-card">
+              <p className="highlight-label">Order</p>
+              <p className="session-meta-value">
+                {sessionSettings.shuffleQuestions ? 'Shuffled' : 'Fixed'}
+              </p>
+            </article>
+
+            <article className="session-meta-card">
+              <p className="highlight-label">Remaining</p>
+              <p className="session-meta-value">{totalQuestions - answeredCount}</p>
+            </article>
           </div>
 
           <div className="progress-bar" aria-hidden="true">

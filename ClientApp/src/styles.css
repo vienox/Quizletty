@@ -329,6 +329,26 @@ select {
   margin-bottom: 0.85rem;
 }
 
+.session-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.session-meta-card {
+  padding: 0.85rem 0.9rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.session-meta-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2a1f18;
+}
+
 .card-header {
   margin-bottom: 1.5rem;
 }
@@ -528,6 +548,10 @@ p {
   .question-stage,
   .result-metrics,
   .result-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .session-meta-grid {
     grid-template-columns: 1fr;
   }
 }

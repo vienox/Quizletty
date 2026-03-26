@@ -395,6 +395,10 @@ export default function App() {
             onSelectAnswer={handleSelectAnswer}
             onSubmit={handleSubmitQuiz}
             question={currentQuestion}
+            sessionSettings={{
+              selectedCategory,
+              shuffleQuestions
+            }}
             shortcutsEnabled
             submitError={submitError}
             totalQuestions={questions.length}
