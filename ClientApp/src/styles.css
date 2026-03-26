@@ -540,6 +540,26 @@ select {
   gap: 0.85rem;
 }
 
+.overlay-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(30, 20, 12, 0.38);
+  backdrop-filter: blur(10px);
+}
+
+.overlay-card {
+  width: min(100%, 34rem);
+  padding: 1.75rem;
+  border-radius: 1.8rem;
+  background: rgba(255, 251, 246, 0.96);
+  border: 1px solid rgba(121, 73, 39, 0.12);
+  box-shadow: 0 1.5rem 4rem rgba(87, 48, 10, 0.2);
+}
+
 .steps-list {
   margin: 0;
   padding-left: 1.25rem;

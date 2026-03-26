@@ -30,6 +30,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
 
   const steps = [
@@ -167,6 +168,7 @@ export default function App() {
       setSessionStartedAt(new Date().toISOString());
       setResult(null);
       setSubmitError('');
+      setShowExitPrompt(false);
       setPhase('taking');
     } catch (error) {
       setQuestionError('Could not load questions for the selected setup.');
@@ -226,6 +228,7 @@ export default function App() {
     setSessionStartedAt(savedDraft.startedAt ?? savedDraft.savedAt ?? now);
     setResult(null);
     setSubmitError('');
+    setShowExitPrompt(false);
     setPhase('taking');
   }
 
@@ -505,7 +508,7 @@ export default function App() {
             onJumpToNextUnanswered={() => {
               jumpToNextMatchingQuestion((item) => answers[item.id] === undefined);
             }}
-            onBackToSetup={() => setPhase('setup')}
+            onBackToSetup={() => setShowExitPrompt(true)}
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
@@ -538,6 +541,35 @@ export default function App() {
             }}
             result={result}
           />
+        )}
+
+        {showExitPrompt && (
+          <section className="overlay-shell" role="dialog" aria-modal="true" aria-labelledby="exit-quiz-title">
+            <article className="overlay-card">
+              <p className="eyebrow">Leave quiz</p>
+              <h2 id="exit-quiz-title">Go back to setup?</h2>
+              <p className="helper-copy">
+                Your current progress stays saved as a draft, so you can come back later from the setup screen.
+              </p>
+
+              <div className="result-actions">
+                <button className="ghost-button result-button" onClick={() => setShowExitPrompt(false)} type="button">
+                  Keep solving
+                </button>
+
+                <button
+                  className="primary-button result-button"
+                  onClick={() => {
+                    setShowExitPrompt(false);
+                    setPhase('setup');
+                  }}
+                  type="button"
+                >
+                  Leave to setup
+                </button>
+              </div>
+            </article>
+          </section>
         )}
       </section>
     </main>
