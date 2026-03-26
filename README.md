@@ -15,7 +15,7 @@ Open `https://localhost:7229/` for the quiz page.
 ## Frontend workflow
 
 React source lives in `ClientApp/`. After frontend changes, rebuild the static assets that ASP.NET serves:
-es
+
 ```bash
 cd ClientApp
 npm install
