@@ -389,11 +389,13 @@ export default function App() {
             activeIndex={activeQuestionIndex}
             answers={answers}
             isSubmitting={isSubmitting}
+            onJumpToQuestion={setActiveQuestionIndex}
             onBackToSetup={() => setPhase('setup')}
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
             onSubmit={handleSubmitQuiz}
+            questions={questions}
             question={currentQuestion}
             sessionSettings={{
               selectedCategory,

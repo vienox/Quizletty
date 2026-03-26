@@ -2,11 +2,13 @@ export default function QuestionStage({
   activeIndex,
   answers,
   isSubmitting,
+  onJumpToQuestion,
   onBackToSetup,
   onMoveNext,
   onMovePrevious,
   onSelectAnswer,
   onSubmit,
+  questions,
   question,
   sessionSettings,
   shortcutsEnabled,
@@ -89,6 +91,24 @@ export default function QuestionStage({
               className="progress-bar-fill"
               style={{ width: `${((activeIndex + 1) / totalQuestions) * 100}%` }}
             />
+          </div>
+
+          <div className="navigator-grid">
+            {questions.map((item, index) => {
+              const isAnswered = answers[item.id] !== undefined;
+              const isActive = item.id === question.id;
+
+              return (
+                <button
+                  className={`navigator-pill${isAnswered ? ' navigator-pill-answered' : ''}${isActive ? ' navigator-pill-active' : ''}`}
+                  key={item.id}
+                  onClick={() => onJumpToQuestion(index)}
+                  type="button"
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
           </div>
 
           <div className="question-actions">
