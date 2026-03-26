@@ -196,6 +196,21 @@ export default function App() {
     });
   }
 
+  function jumpToNextMatchingQuestion(predicate) {
+    if (questions.length === 0) {
+      return;
+    }
+
+    for (let offset = 1; offset <= questions.length; offset += 1) {
+      const candidateIndex = (activeQuestionIndex + offset) % questions.length;
+
+      if (predicate(questions[candidateIndex])) {
+        setActiveQuestionIndex(candidateIndex);
+        return;
+      }
+    }
+  }
+
   function resumeSavedDraft() {
     if (!savedDraft) {
       return;
@@ -480,8 +495,16 @@ export default function App() {
             activeIndex={activeQuestionIndex}
             answers={answers}
             flaggedQuestions={flaggedQuestions}
+            hasFlaggedQuestions={questions.some((item) => Boolean(flaggedQuestions[item.id]))}
+            hasUnansweredQuestions={questions.some((item) => answers[item.id] === undefined)}
             isSubmitting={isSubmitting}
             onJumpToQuestion={setActiveQuestionIndex}
+            onJumpToNextFlagged={() => {
+              jumpToNextMatchingQuestion((item) => Boolean(flaggedQuestions[item.id]));
+            }}
+            onJumpToNextUnanswered={() => {
+              jumpToNextMatchingQuestion((item) => answers[item.id] === undefined);
+            }}
             onBackToSetup={() => setPhase('setup')}
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}

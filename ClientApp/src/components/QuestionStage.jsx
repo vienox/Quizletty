@@ -4,8 +4,12 @@ export default function QuestionStage({
   activeIndex,
   answers,
   flaggedQuestions,
+  hasFlaggedQuestions,
+  hasUnansweredQuestions,
   isSubmitting,
   onJumpToQuestion,
+  onJumpToNextFlagged,
+  onJumpToNextUnanswered,
   onBackToSetup,
   onMoveNext,
   onMovePrevious,
@@ -148,6 +152,26 @@ export default function QuestionStage({
                 </button>
               );
             })}
+          </div>
+
+          <div className="quick-jump-grid">
+            <button
+              className="ghost-button"
+              disabled={!hasUnansweredQuestions}
+              onClick={onJumpToNextUnanswered}
+              type="button"
+            >
+              Next unanswered
+            </button>
+
+            <button
+              className="ghost-button"
+              disabled={!hasFlaggedQuestions}
+              onClick={onJumpToNextFlagged}
+              type="button"
+            >
+              Next flagged
+            </button>
           </div>
 
           <div className="question-actions">
