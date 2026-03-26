@@ -20,6 +20,7 @@ export function loadSessionDraft() {
       flaggedQuestions: parsedValue.flaggedQuestions ?? {},
       questions: parsedValue.questions,
       savedAt: parsedValue.savedAt ?? null,
+      startedAt: parsedValue.startedAt ?? null,
       settings: parsedValue.settings ?? null
     };
   } catch {

@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 export default function QuestionStage({
   activeIndex,
   answers,
@@ -22,6 +24,29 @@ export default function QuestionStage({
   const isLastQuestion = activeIndex === totalQuestions - 1;
   const isReadyToSubmit = answeredCount === totalQuestions;
   const isFlagged = Boolean(flaggedQuestions[question.id]);
+  const [elapsedLabel, setElapsedLabel] = useState('00:00');
+
+  useEffect(() => {
+    function updateElapsedLabel() {
+      if (!sessionSettings.sessionStartedAt) {
+        setElapsedLabel('00:00');
+        return;
+      }
+
+      const elapsedMilliseconds = Date.now() - new Date(sessionSettings.sessionStartedAt).getTime();
+      const totalSeconds = Math.max(0, Math.floor(elapsedMilliseconds / 1000));
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      setElapsedLabel(`${minutes}:${seconds}`);
+    }
+
+    updateElapsedLabel();
+    const intervalId = window.setInterval(updateElapsedLabel, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [sessionSettings.sessionStartedAt]);
 
   return (
     <section className="question-stage">
@@ -91,6 +116,11 @@ export default function QuestionStage({
             <article className="session-meta-card">
               <p className="highlight-label">Flagged</p>
               <p className="session-meta-value">{sessionSettings.flaggedCount}</p>
+            </article>
+
+            <article className="session-meta-card">
+              <p className="highlight-label">Elapsed</p>
+              <p className="session-meta-value">{elapsedLabel}</p>
             </article>
           </div>
 

@@ -10,6 +10,7 @@ import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/ses
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
+  const [now] = useState(() => new Date().toISOString());
   const [categories, setCategories] = useState([]);
   const [stats, setStats] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(storedPreferences.selectedCategory);
@@ -29,6 +30,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
+  const [sessionStartedAt, setSessionStartedAt] = useState(null);
 
   const steps = [
     'Pick a category or keep the full mix.',
@@ -127,6 +129,7 @@ export default function App() {
       flaggedQuestions,
       questions,
       savedAt: new Date().toISOString(),
+      startedAt: sessionStartedAt,
       settings: {
         questionLimit,
         selectedCategory,
@@ -142,6 +145,7 @@ export default function App() {
     questionLimit,
     questions,
     selectedCategory,
+    sessionStartedAt,
     shuffleQuestions
   ]);
 
@@ -160,6 +164,7 @@ export default function App() {
       setAnswers({});
       setFlaggedQuestions({});
       setActiveQuestionIndex(0);
+      setSessionStartedAt(new Date().toISOString());
       setResult(null);
       setSubmitError('');
       setPhase('taking');
@@ -203,6 +208,7 @@ export default function App() {
     setAnswers(savedDraft.answers ?? {});
     setFlaggedQuestions(savedDraft.flaggedQuestions ?? {});
     setActiveQuestionIndex(savedDraft.activeQuestionIndex ?? 0);
+    setSessionStartedAt(savedDraft.startedAt ?? savedDraft.savedAt ?? now);
     setResult(null);
     setSubmitError('');
     setPhase('taking');
@@ -234,6 +240,7 @@ export default function App() {
       setRecentRuns(saveRecentRun(historyEntry));
       clearSessionDraft();
       setSavedDraft(null);
+      setSessionStartedAt(null);
       setResult(submissionResult);
       setPhase('result');
     } catch (error) {
@@ -486,6 +493,7 @@ export default function App() {
             sessionSettings={{
               flaggedCount: Object.keys(flaggedQuestions).length,
               selectedCategory,
+              sessionStartedAt,
               shuffleQuestions
             }}
             shortcutsEnabled
@@ -501,6 +509,7 @@ export default function App() {
               setQuestions([]);
               setAnswers({});
               setFlaggedQuestions({});
+              setSessionStartedAt(null);
               setResult(null);
               setActiveQuestionIndex(0);
             }}
