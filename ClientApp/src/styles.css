@@ -186,6 +186,52 @@ select {
   border: 1px solid rgba(66, 42, 27, 0.08);
 }
 
+.history-breakdown-card {
+  margin-bottom: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1.3rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.history-breakdown-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.history-breakdown-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10rem, 15rem);
+  gap: 1rem;
+  align-items: center;
+}
+
+.history-breakdown-copy {
+  min-width: 0;
+}
+
+.history-breakdown-metric {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mini-progress {
+  width: 100%;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: rgba(99, 75, 58, 0.12);
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #0e7668, #ff914d);
+}
+
 .history-item {
   padding: 1rem 1.1rem;
   border-radius: 1.2rem;
@@ -646,6 +692,11 @@ p {
   }
 
   .history-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-breakdown-row,
+  .history-breakdown-metric {
     grid-template-columns: 1fr;
   }
 }

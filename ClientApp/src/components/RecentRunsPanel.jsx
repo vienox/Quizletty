@@ -39,6 +39,23 @@ export default function RecentRunsPanel({ onClear, runs }) {
     }))
     .sort((left, right) => right.accuracy - left.accuracy)[0] ?? null;
 
+  const categoryLeaderboard = [...categoryTotals.entries()]
+    .map(([category, totals]) => ({
+      accuracy: totals.totalQuestions === 0
+        ? 0
+        : Math.round((totals.correctAnswers / totals.totalQuestions) * 100),
+      category,
+      correctAnswers: totals.correctAnswers,
+      totalQuestions: totals.totalQuestions
+    }))
+    .sort((left, right) => {
+      if (right.accuracy !== left.accuracy) {
+        return right.accuracy - left.accuracy;
+      }
+
+      return right.totalQuestions - left.totalQuestions;
+    });
+
   return (
     <article className="steps-card">
       <div className="card-header">
@@ -76,6 +93,38 @@ export default function RecentRunsPanel({ onClear, runs }) {
               </p>
             </article>
           </div>
+
+          {categoryLeaderboard.length > 0 && (
+            <div className="history-breakdown-card">
+              <div className="card-header">
+                <p className="eyebrow">Category form</p>
+                <h2>How the recent training history breaks down.</h2>
+              </div>
+
+              <div className="history-breakdown-list">
+                {categoryLeaderboard.map((item) => (
+                  <article className="history-breakdown-row" key={item.category}>
+                    <div className="history-breakdown-copy">
+                      <p className="highlight-value">{item.category}</p>
+                      <p className="history-copy">
+                        {item.correctAnswers}/{item.totalQuestions} correct
+                      </p>
+                    </div>
+
+                    <div className="history-breakdown-metric">
+                      <div className="mini-progress" aria-hidden="true">
+                        <span
+                          className="mini-progress-fill"
+                          style={{ width: `${item.accuracy}%` }}
+                        />
+                      </div>
+                      <span className="review-status review-status-correct">{item.accuracy}%</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="history-list">
             {runs.map((run) => (
