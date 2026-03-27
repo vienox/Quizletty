@@ -28,6 +28,10 @@ export default function RecentRunsPanel({ onClear, runs }) {
                 </div>
 
                 <p className="history-copy">
+                  {run.correctAnswers} correct / {run.incorrectAnswers} missed
+                </p>
+
+                <p className="history-copy">
                   {run.category === 'all' ? 'All categories' : run.category}
                   {' / '}
                   {run.questionCount} question{run.questionCount === 1 ? '' : 's'}

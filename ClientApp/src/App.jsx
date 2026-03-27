@@ -246,9 +246,12 @@ export default function App() {
 
       const submissionResult = await submitQuiz(payload);
       const historyEntry = {
+        categories: submissionResult.categories,
         id: `${Date.now()}`,
         category: selectedCategory,
         completedAt: new Date().toISOString(),
+        correctAnswers: submissionResult.correctAnswers,
+        incorrectAnswers: submissionResult.incorrectAnswers,
         percentage: submissionResult.percentage,
         questionCount: questions.length,
         score: submissionResult.score,
