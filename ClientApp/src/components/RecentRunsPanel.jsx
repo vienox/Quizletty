@@ -92,6 +92,15 @@ export default function RecentRunsPanel({ onClear, runs }) {
         return right.totalQuestions - left.totalQuestions;
     });
 
+  const weakestCategory = [...categoryLeaderboard]
+    .sort((left, right) => {
+      if (left.accuracy !== right.accuracy) {
+        return left.accuracy - right.accuracy;
+      }
+
+      return right.totalQuestions - left.totalQuestions;
+    })[0] ?? null;
+
   const trendRuns = [...filteredRuns]
     .slice(0, 6)
     .reverse();
@@ -105,6 +114,33 @@ export default function RecentRunsPanel({ onClear, runs }) {
     : trendDelta < 0
       ? `Down ${Math.abs(trendDelta)}%`
       : 'Flat trend';
+
+  const trainingFocus = weakestCategory
+    ? weakestCategory.category
+    : strongestCategory?.category ?? 'mixed review';
+
+  const recommendationTitle = weakestCategory
+    ? `Focus next on ${weakestCategory.category}.`
+    : strongestCategory
+      ? `Keep reinforcing ${strongestCategory.category}.`
+      : 'Build a baseline with a few more quiz runs.';
+
+  const recommendationCopy = weakestCategory
+    ? `${weakestCategory.accuracy}% accuracy across ${weakestCategory.totalQuestions} questions suggests this is the best place to improve next.`
+    : strongestCategory
+      ? `${strongestCategory.accuracy}% accuracy shows a strong area. Use a mixed run to confirm it stays consistent.`
+      : 'Once you complete a few more runs, the dashboard will start suggesting a concrete training focus.';
+
+  const recommendationSteps = [
+    filteredRuns.some((run) => run.category === 'all')
+      ? 'Run one focused category session next to tighten weak spots faster.'
+      : 'Run one mixed session next to test retention outside a single category.',
+    trendDelta < 0
+      ? 'Your recent momentum is slipping, so aim for a shorter corrective run now.'
+      : trendDelta > 0
+        ? 'Momentum is positive, so keep the same pace and raise question count slightly.'
+        : 'Momentum is flat, so switch either the category or the question count for a stronger signal.'
+  ];
 
   return (
     <article className="steps-card">
@@ -163,6 +199,29 @@ export default function RecentRunsPanel({ onClear, runs }) {
                 {strongestCategory ? `${strongestCategory.accuracy}% accuracy` : 'Finish more runs'}
               </p>
             </article>
+          </div>
+
+          <div className="history-recommendation-card">
+            <div className="card-header">
+              <p className="eyebrow">Suggested focus</p>
+              <h2>{recommendationTitle}</h2>
+            </div>
+
+            <p className="history-copy">{recommendationCopy}</p>
+
+            <div className="history-recommendation-tags">
+              <span className="review-status review-status-correct">{historyFilter === 'all-runs' ? 'All stored runs' : 'Filtered view'}</span>
+              <span className="review-status review-status-correct">Target: {trainingFocus}</span>
+              <span className="review-status review-status-correct">{trendLabel}</span>
+            </div>
+
+            <div className="history-recommendation-list">
+              {recommendationSteps.map((step) => (
+                <p className="history-copy" key={step}>
+                  {step}
+                </p>
+              ))}
+            </div>
           </div>
 
           {trendRuns.length > 0 && (
