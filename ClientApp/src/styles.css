@@ -172,6 +172,20 @@ select {
   gap: 0.8rem;
 }
 
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.history-summary-card {
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
 .history-item {
   padding: 1rem 1.1rem;
   border-radius: 1.2rem;
@@ -628,6 +642,10 @@ p {
   }
 
   .quick-jump-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-summary-grid {
     grid-template-columns: 1fr;
   }
 }
