@@ -345,14 +345,13 @@ export default function App() {
       <section className="page-frame">
         <header className="masthead">
           <div>
-            <p className="eyebrow">Quizletty / React Client</p>
+            <p className="eyebrow">Quizletty</p>
             <h1>Run the quiz in one calm, focused flow.</h1>
           </div>
 
           <p className="masthead-copy">
-            The React client now covers the whole quiz flow, from saved setup
-            preferences and resumable quiz drafts to scored results with
-            shareable summaries.
+            Choose a topic, answer at your own pace and come back to clear,
+            useful feedback the moment the run is over.
           </p>
         </header>
 
