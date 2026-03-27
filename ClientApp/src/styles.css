@@ -262,6 +262,13 @@ select {
   margin-bottom: 1rem;
 }
 
+.history-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
 .category-result-card,
 .review-item {
   padding: 1rem 1.1rem;

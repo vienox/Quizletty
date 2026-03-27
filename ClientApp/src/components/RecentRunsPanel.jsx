@@ -1,14 +1,50 @@
+import { useEffect, useState } from 'react';
+
 const dateFormatter = new Intl.DateTimeFormat('en', {
   dateStyle: 'medium',
   timeStyle: 'short'
 });
 
 export default function RecentRunsPanel({ onClear, runs }) {
-  const averageAccuracy = runs.length > 0
-    ? Math.round(runs.reduce((sum, run) => sum + run.percentage, 0) / runs.length)
+  const availableFilters = [
+    { label: 'All runs', value: 'all-runs' },
+    ...(runs.some((run) => run.category === 'all')
+      ? [{ label: 'Mixed only', value: 'mixed-runs' }]
+      : []),
+    ...[...new Set(runs
+      .filter((run) => run.category !== 'all')
+      .map((run) => run.category))]
+      .sort()
+      .map((category) => ({
+        label: category,
+        value: `category:${category}`
+      }))
+  ];
+  const [historyFilter, setHistoryFilter] = useState('all-runs');
+
+  useEffect(() => {
+    if (!availableFilters.some((item) => item.value === historyFilter)) {
+      setHistoryFilter('all-runs');
+    }
+  }, [availableFilters, historyFilter]);
+
+  const filteredRuns = runs.filter((run) => {
+    if (historyFilter === 'all-runs') {
+      return true;
+    }
+
+    if (historyFilter === 'mixed-runs') {
+      return run.category === 'all';
+    }
+
+    return run.category === historyFilter.replace('category:', '');
+  });
+
+  const averageAccuracy = filteredRuns.length > 0
+    ? Math.round(filteredRuns.reduce((sum, run) => sum + run.percentage, 0) / filteredRuns.length)
     : 0;
 
-  const bestRun = runs.reduce((best, run) => {
+  const bestRun = filteredRuns.reduce((best, run) => {
     if (!best || run.percentage > best.percentage) {
       return run;
     }
@@ -16,7 +52,7 @@ export default function RecentRunsPanel({ onClear, runs }) {
     return best;
   }, null);
 
-  const categoryTotals = runs
+  const categoryTotals = filteredRuns
     .flatMap((run) => run.categories ?? [])
     .reduce((totals, category) => {
       const current = totals.get(category.category) ?? {
@@ -71,6 +107,27 @@ export default function RecentRunsPanel({ onClear, runs }) {
 
       {runs.length > 0 && (
         <>
+          <div className="history-filter-row">
+            {availableFilters.map((item) => (
+              <button
+                className={`category-pill${historyFilter === item.value ? ' category-pill-active' : ''}`}
+                key={item.value}
+                onClick={() => setHistoryFilter(item.value)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {filteredRuns.length === 0 && (
+            <p className="helper-copy">
+              No stored quiz sessions match the current history filter.
+            </p>
+          )}
+
+          {filteredRuns.length > 0 && (
+            <>
           <div className="history-summary-grid">
             <article className="history-summary-card">
               <p className="highlight-label">Average accuracy</p>
@@ -127,7 +184,7 @@ export default function RecentRunsPanel({ onClear, runs }) {
           )}
 
           <div className="history-list">
-            {runs.map((run) => (
+            {filteredRuns.map((run) => (
               <article className="history-item" key={run.id}>
                 <div className="history-topline">
                   <p className="highlight-value">{run.score}</p>
@@ -149,6 +206,8 @@ export default function RecentRunsPanel({ onClear, runs }) {
               </article>
             ))}
           </div>
+            </>
+          )}
 
           <button className="ghost-button history-clear-button" onClick={onClear} type="button">
             Clear recent runs
