@@ -89,8 +89,22 @@ export default function RecentRunsPanel({ onClear, runs }) {
         return right.accuracy - left.accuracy;
       }
 
-      return right.totalQuestions - left.totalQuestions;
+        return right.totalQuestions - left.totalQuestions;
     });
+
+  const trendRuns = [...filteredRuns]
+    .slice(0, 6)
+    .reverse();
+
+  const trendDelta = trendRuns.length >= 2
+    ? trendRuns[trendRuns.length - 1].percentage - trendRuns[0].percentage
+    : 0;
+
+  const trendLabel = trendDelta > 0
+    ? `Up ${trendDelta}%`
+    : trendDelta < 0
+      ? `Down ${Math.abs(trendDelta)}%`
+      : 'Flat trend';
 
   return (
     <article className="steps-card">
@@ -150,6 +164,38 @@ export default function RecentRunsPanel({ onClear, runs }) {
               </p>
             </article>
           </div>
+
+          {trendRuns.length > 0 && (
+            <div className="history-breakdown-card">
+              <div className="card-header">
+                <p className="eyebrow">Momentum</p>
+                <h2>How your latest filtered runs are moving.</h2>
+              </div>
+
+              <div className="trend-topline">
+                <p className="highlight-value">{trendLabel}</p>
+                <p className="history-copy">
+                  Based on the last {trendRuns.length} stored run{trendRuns.length === 1 ? '' : 's'}.
+                </p>
+              </div>
+
+              <div className="trend-bars">
+                {trendRuns.map((run, index) => (
+                  <article className="trend-bar-card" key={run.id}>
+                    <div className="trend-bar-shell" aria-hidden="true">
+                      <span
+                        className="trend-bar-fill"
+                        style={{ height: `${Math.max(run.percentage, 6)}%` }}
+                      />
+                    </div>
+
+                    <p className="highlight-label">Run {index + 1}</p>
+                    <p className="history-copy">{run.percentage}%</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
 
           {categoryLeaderboard.length > 0 && (
             <div className="history-breakdown-card">
