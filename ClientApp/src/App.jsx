@@ -127,6 +127,33 @@ export default function App() {
         : `Stay inside ${selectedCategory} and review it in sequence.`
     }
   ];
+  const challengePresets = [
+    {
+      category: 'all',
+      label: 'Shuffle sprint',
+      questionLimit: 8,
+      shuffleQuestions: true,
+      summary: 'Fast mixed pressure with no fixed order.'
+    },
+    {
+      category: selectedCategory === 'all' ? 'Programming' : selectedCategory,
+      label: 'Topic lock-in',
+      questionLimit: Math.min(8, selectedCategory === 'all'
+        ? stats?.categories?.find((item) => item.category === 'Programming')?.questionCount ?? 8
+        : maxQuestions),
+      shuffleQuestions: false,
+      summary: selectedCategory === 'all'
+        ? 'A denser focused run in one technical lane.'
+        : `Push deeper inside ${selectedCategory} without randomization.`
+    },
+    {
+      category: 'all',
+      label: 'Long review',
+      questionLimit: Math.min(12, stats?.totalQuestions ?? 12),
+      shuffleQuestions: false,
+      summary: 'A steadier full-bank run for a longer review block.'
+    }
+  ];
   const categoryCards = [
     {
       category: 'all',
@@ -481,6 +508,26 @@ export default function App() {
                       {preset.questionLimit} question{preset.questionLimit === 1 ? '' : 's'}
                     </p>
                     <p className="history-copy">{preset.summary}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="challenge-run-grid">
+                {challengePresets.map((preset) => (
+                  <button
+                    className="challenge-run-card"
+                    key={`${preset.label}-${preset.category}-${preset.questionLimit}`}
+                    onClick={() => applyQuickStartPreset(preset)}
+                    type="button"
+                  >
+                    <p className="eyebrow">Challenge run</p>
+                    <h2>{preset.label}</h2>
+                    <p className="history-copy">{preset.summary}</p>
+                    <p className="history-copy">
+                      {preset.questionLimit} question{preset.questionLimit === 1 ? '' : 's'}
+                      {' / '}
+                      {preset.shuffleQuestions ? 'shuffled' : 'fixed order'}
+                    </p>
                   </button>
                 ))}
               </div>

@@ -399,6 +399,29 @@ select {
   box-shadow: 0 1rem 2rem rgba(28, 69, 63, 0.08);
 }
 
+.challenge-run-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.challenge-run-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border-radius: 1.3rem;
+  border: 1px solid rgba(66, 42, 27, 0.08);
+  background: linear-gradient(135deg, rgba(14, 118, 104, 0.1), rgba(255, 145, 77, 0.14));
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.challenge-run-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(87, 48, 10, 0.1);
+}
+
 .filter-pills {
   display: flex;
   flex-wrap: wrap;
@@ -856,6 +879,10 @@ p {
   }
 
   .quick-start-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .challenge-run-grid {
     grid-template-columns: 1fr;
   }
 }
