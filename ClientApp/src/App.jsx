@@ -102,6 +102,20 @@ export default function App() {
     ? stats?.totalQuestions ?? 1
     : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
   const selectedCategoryTheme = getCategoryTheme(selectedCategory);
+  const categoryCards = [
+    {
+      category: 'all',
+      label: 'All categories',
+      questionCount: stats?.totalQuestions ?? 0,
+      ...getCategoryTheme('all')
+    },
+    ...(stats?.categories?.map((item) => ({
+      category: item.category,
+      label: item.category,
+      questionCount: item.questionCount,
+      ...getCategoryTheme(item.category)
+    })) ?? [])
+  ];
 
   useEffect(() => {
     setQuestionLimit((current) => {
@@ -438,6 +452,31 @@ export default function App() {
                     type="button"
                   >
                     {item.category}
+                  </button>
+                  ))}
+              </div>
+
+              <div className="category-card-grid">
+                {categoryCards.map((item) => (
+                  <button
+                    className={`category-card-choice${selectedCategory === item.category ? ' category-card-choice-active' : ''}`}
+                    key={item.category}
+                    onClick={() => setSelectedCategory(item.category)}
+                    type="button"
+                  >
+                    <div
+                      className="category-card-artwork"
+                      style={{ backgroundImage: `url("${item.artwork}")` }}
+                    />
+
+                    <div className="category-card-copy">
+                      <p className="eyebrow">{item.eyebrow}</p>
+                      <h2>{item.label}</h2>
+                      <p className="history-copy">{item.summary}</p>
+                      <p className="history-copy">
+                        {item.questionCount} question{item.questionCount === 1 ? '' : 's'}
+                      </p>
+                    </div>
                   </button>
                 ))}
               </div>
