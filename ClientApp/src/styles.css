@@ -376,6 +376,29 @@ select {
   gap: 0.35rem;
 }
 
+.quick-start-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.quick-start-card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(66, 42, 27, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.quick-start-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(28, 69, 63, 0.08);
+}
+
 .filter-pills {
   display: flex;
   flex-wrap: wrap;
@@ -829,6 +852,10 @@ p {
   }
 
   .category-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-start-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -102,6 +102,31 @@ export default function App() {
     ? stats?.totalQuestions ?? 1
     : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
   const selectedCategoryTheme = getCategoryTheme(selectedCategory);
+  const quickStartPresets = [
+    {
+      category: 'all',
+      label: 'Quick warm-up',
+      questionLimit: 5,
+      shuffleQuestions: true,
+      summary: 'Short mixed run to get moving fast.'
+    },
+    {
+      category: 'all',
+      label: 'Deep mixed run',
+      questionLimit: 10,
+      shuffleQuestions: true,
+      summary: 'Broader session across the full bank.'
+    },
+    {
+      category: selectedCategory === 'all' ? 'all' : selectedCategory,
+      label: 'Focused category drill',
+      questionLimit: Math.min(6, maxQuestions),
+      shuffleQuestions: false,
+      summary: selectedCategory === 'all'
+        ? 'Switch to one category first for a tighter practice run.'
+        : `Stay inside ${selectedCategory} and review it in sequence.`
+    }
+  ];
   const categoryCards = [
     {
       category: 'all',
@@ -246,6 +271,14 @@ export default function App() {
     setSubmitError('');
     setShowExitPrompt(false);
     setPhase('taking');
+  }
+
+  function applyQuickStartPreset(preset) {
+    setSelectedCategory(preset.category);
+    setQuestionLimit(Math.min(preset.questionLimit, preset.category === 'all'
+      ? stats?.totalQuestions ?? preset.questionLimit
+      : stats?.categories?.find((item) => item.category === preset.category)?.questionCount ?? preset.questionLimit));
+    setShuffleQuestions(preset.shuffleQuestions);
   }
 
   async function handleSubmitQuiz() {
@@ -433,6 +466,23 @@ export default function App() {
                   onChange={(event) => setShuffleQuestions(event.target.checked)}
                   type="checkbox"
                 />
+              </div>
+
+              <div className="quick-start-grid">
+                {quickStartPresets.map((preset) => (
+                  <button
+                    className="quick-start-card"
+                    key={`${preset.label}-${preset.category}-${preset.questionLimit}`}
+                    onClick={() => applyQuickStartPreset(preset)}
+                    type="button"
+                  >
+                    <p className="highlight-label">{preset.label}</p>
+                    <p className="highlight-value">
+                      {preset.questionLimit} question{preset.questionLimit === 1 ? '' : 's'}
+                    </p>
+                    <p className="history-copy">{preset.summary}</p>
+                  </button>
+                ))}
               </div>
 
               <div className="category-pills">
