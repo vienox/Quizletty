@@ -310,6 +310,30 @@ select {
   font-size: 0.94rem;
 }
 
+.category-focus-card {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.category-focus-artwork {
+  width: 100%;
+  min-height: 11rem;
+  border-radius: 1.25rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.category-focus-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
 .filter-pills {
   display: flex;
   flex-wrap: wrap;

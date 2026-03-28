@@ -4,6 +4,7 @@ import ResumeDraftCard from './components/ResumeDraftCard.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
+import { getCategoryTheme } from './lib/categoryThemes.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
@@ -100,6 +101,7 @@ export default function App() {
   const maxQuestions = selectedCategory === 'all'
     ? stats?.totalQuestions ?? 1
     : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
+  const selectedCategoryTheme = getCategoryTheme(selectedCategory);
 
   useEffect(() => {
     setQuestionLimit((current) => {
@@ -455,6 +457,26 @@ export default function App() {
                 {questionLimit} question{questionLimit === 1 ? '' : 's'}
                 {shuffleQuestions ? ' / shuffled' : ' / fixed order'}.
               </p>
+
+              <article className="category-focus-card">
+                <div
+                  className="category-focus-artwork"
+                  style={{ backgroundImage: `url("${selectedCategoryTheme.artwork}")` }}
+                />
+
+                <div className="category-focus-copy">
+                  <p className="eyebrow">{selectedCategoryTheme.eyebrow}</p>
+                  <h2>
+                    {selectedCategory === 'all' ? 'Mixed quiz selection' : selectedCategory}
+                  </h2>
+                  <p className="helper-copy">
+                    {selectedCategoryTheme.summary}
+                  </p>
+                  <p className="history-copy">
+                    {maxQuestions} question{maxQuestions === 1 ? '' : 's'} available in this track.
+                  </p>
+                </div>
+              </article>
 
               {questionError && <p className="error-copy">{questionError}</p>}
             </article>
