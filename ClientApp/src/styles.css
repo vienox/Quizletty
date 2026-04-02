@@ -215,6 +215,13 @@ select {
   margin-top: 0.9rem;
 }
 
+.history-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
 .history-breakdown-list {
   display: grid;
   gap: 0.75rem;
@@ -308,6 +315,17 @@ select {
 
 .history-copy {
   font-size: 0.94rem;
+}
+
+.result-follow-up-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.result-follow-up-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
 }
 
 .category-focus-card {

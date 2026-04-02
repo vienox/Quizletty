@@ -1,6 +1,12 @@
 import { useState } from 'react';
 
-export default function ResultStage({ onRestart, result }) {
+export default function ResultStage({
+  followUpPreset,
+  isStartingFollowUp,
+  onRestart,
+  onStartFollowUp,
+  result
+}) {
   const [reviewFilter, setReviewFilter] = useState('all');
   const [copyState, setCopyState] = useState('idle');
   const metrics = [
@@ -63,6 +69,38 @@ export default function ResultStage({ onRestart, result }) {
           </article>
         ))}
       </section>
+
+      {followUpPreset && (
+        <article className="detail-card result-follow-up-card">
+          <div className="card-header">
+            <p className="eyebrow">Next move</p>
+            <h2>{followUpPreset.label}</h2>
+          </div>
+
+          <p className="helper-copy">{followUpPreset.summary}</p>
+
+          <div className="result-follow-up-meta">
+            <span className="review-status review-status-correct">
+              {followUpPreset.category === 'all' ? 'Mixed run' : followUpPreset.category}
+            </span>
+            <span className="review-status review-status-correct">
+              {followUpPreset.questionLimit} question{followUpPreset.questionLimit === 1 ? '' : 's'}
+            </span>
+            <span className="review-status review-status-correct">
+              {followUpPreset.shuffleQuestions ? 'Shuffled' : 'Fixed order'}
+            </span>
+          </div>
+
+          <button
+            className="secondary-button result-button"
+            disabled={isStartingFollowUp}
+            onClick={onStartFollowUp}
+            type="button"
+          >
+            {isStartingFollowUp ? 'Loading follow-up run...' : 'Start recommended follow-up'}
+          </button>
+        </article>
+      )}
 
       <section className="result-detail-grid">
         <article className="detail-card">

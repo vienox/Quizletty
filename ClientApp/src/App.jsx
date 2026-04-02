@@ -118,6 +118,19 @@ export default function App() {
     return preferredCategories.find((category) => categoryQuestionCounts.has(category)) ?? 'all';
   }
 
+  function normalizeSessionSettings(settings) {
+    const normalizedCategory = settings.category && settings.category !== 'all' && categoryQuestionCounts.has(settings.category)
+      ? settings.category
+      : 'all';
+    const availableQuestions = getQuestionCountForCategory(normalizedCategory);
+
+    return {
+      category: normalizedCategory,
+      questionLimit: Math.min(Math.max(settings.questionLimit ?? 1, 1), availableQuestions),
+      shuffleQuestions: Boolean(settings.shuffleQuestions)
+    };
+  }
+
   const featuredQuizPacks = [
     {
       category: 'all',
@@ -297,6 +310,44 @@ export default function App() {
       detail: selectedCategory === 'all' ? 'Across the full bank' : 'Inside one topic'
     }
   ];
+  const resultFollowUpPreset = result
+    ? (() => {
+        const rankedCategories = [...result.categories]
+          .map((item) => ({
+            ...item,
+            accuracy: item.totalQuestions === 0 ? 0 : item.correctAnswers / item.totalQuestions
+          }))
+          .sort((left, right) => {
+            if (left.accuracy !== right.accuracy) {
+              return left.accuracy - right.accuracy;
+            }
+
+            return right.totalQuestions - left.totalQuestions;
+          });
+        const weakestCategory = rankedCategories[0];
+
+        if (!weakestCategory) {
+          return {
+            category: 'all',
+            label: 'Run another mixed check',
+            questionLimit: Math.min(6, getQuestionCountForCategory('all')),
+            shuffleQuestions: true,
+            summary: 'Start another broad pass across the quiz bank.'
+          };
+        }
+
+        return {
+          category: weakestCategory.category,
+          label: `Drill ${weakestCategory.category}`,
+          questionLimit: Math.min(
+            Math.max(weakestCategory.totalQuestions, 4),
+            getQuestionCountForCategory(weakestCategory.category)
+          ),
+          shuffleQuestions: false,
+          summary: `${Math.round(weakestCategory.accuracy * 100)}% accuracy in ${weakestCategory.category} makes it the clearest next follow-up.`
+        };
+      })()
+    : null;
 
   useEffect(() => {
     setQuestionLimit((current) => {
@@ -347,15 +398,20 @@ export default function App() {
     shuffleQuestions
   ]);
 
-  async function startSession() {
+  async function startSessionWithSettings(settings) {
+    const normalizedSettings = normalizeSessionSettings(settings);
+
+    setSelectedCategory(normalizedSettings.category);
+    setQuestionLimit(normalizedSettings.questionLimit);
+    setShuffleQuestions(normalizedSettings.shuffleQuestions);
     setIsLoadingQuestions(true);
     setQuestionError('');
 
     try {
       const questionItems = await getQuestions({
-        category: selectedCategory,
-        limit: Math.min(questionLimit, maxQuestions),
-        shuffle: shuffleQuestions
+        category: normalizedSettings.category,
+        limit: normalizedSettings.questionLimit,
+        shuffle: normalizedSettings.shuffleQuestions
       });
 
       setQuestions(questionItems);
@@ -372,6 +428,14 @@ export default function App() {
     } finally {
       setIsLoadingQuestions(false);
     }
+  }
+
+  async function startSession() {
+    await startSessionWithSettings({
+      category: selectedCategory,
+      questionLimit,
+      shuffleQuestions
+    });
   }
 
   function handleSelectAnswer(questionId, answerId) {
@@ -430,11 +494,11 @@ export default function App() {
   }
 
   function applyQuickStartPreset(preset) {
-    setSelectedCategory(preset.category);
-    setQuestionLimit(Math.min(preset.questionLimit, preset.category === 'all'
-      ? stats?.totalQuestions ?? preset.questionLimit
-      : stats?.categories?.find((item) => item.category === preset.category)?.questionCount ?? preset.questionLimit));
-    setShuffleQuestions(preset.shuffleQuestions);
+    const normalizedPreset = normalizeSessionSettings(preset);
+
+    setSelectedCategory(normalizedPreset.category);
+    setQuestionLimit(normalizedPreset.questionLimit);
+    setShuffleQuestions(normalizedPreset.shuffleQuestions);
   }
 
   async function handleSubmitQuiz() {
@@ -849,9 +913,20 @@ export default function App() {
               </article>
 
               <RecentRunsPanel
+                isLaunchingRun={isLoadingQuestions}
                 onClear={() => {
                   clearRecentRuns();
                   setRecentRuns([]);
+                }}
+                onReplayRun={(run) => {
+                  startSessionWithSettings({
+                    category: run.category,
+                    questionLimit: run.questionCount,
+                    shuffleQuestions: run.shuffleQuestions
+                  });
+                }}
+                onStartRecommendedRun={(preset) => {
+                  startSessionWithSettings(preset);
                 }}
                 runs={recentRuns}
               />
@@ -896,6 +971,8 @@ export default function App() {
 
         {phase === 'result' && result && (
           <ResultStage
+            followUpPreset={resultFollowUpPreset}
+            isStartingFollowUp={isLoadingQuestions}
             onRestart={() => {
               setPhase('setup');
               setQuestions([]);
@@ -904,6 +981,13 @@ export default function App() {
               setSessionStartedAt(null);
               setResult(null);
               setActiveQuestionIndex(0);
+            }}
+            onStartFollowUp={() => {
+              if (!resultFollowUpPreset) {
+                return;
+              }
+
+              startSessionWithSettings(resultFollowUpPreset);
             }}
             result={result}
           />

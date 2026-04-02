@@ -5,7 +5,13 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
   timeStyle: 'short'
 });
 
-export default function RecentRunsPanel({ onClear, runs }) {
+export default function RecentRunsPanel({
+  isLaunchingRun,
+  onClear,
+  onReplayRun,
+  onStartRecommendedRun,
+  runs
+}) {
   const availableFilters = [
     { label: 'All runs', value: 'all-runs' },
     ...(runs.some((run) => run.category === 'all')
@@ -142,6 +148,18 @@ export default function RecentRunsPanel({ onClear, runs }) {
         : 'Momentum is flat, so switch either the category or the question count for a stronger signal.'
   ];
 
+  const recommendedRunPreset = weakestCategory
+    ? {
+        category: weakestCategory.category,
+        questionLimit: Math.min(Math.max(weakestCategory.totalQuestions, 4), 8),
+        shuffleQuestions: false
+      }
+    : {
+        category: 'all',
+        questionLimit: 6,
+        shuffleQuestions: true
+      };
+
   return (
     <article className="steps-card">
       <div className="card-header">
@@ -221,6 +239,17 @@ export default function RecentRunsPanel({ onClear, runs }) {
                   {step}
                 </p>
               ))}
+            </div>
+
+            <div className="history-item-actions">
+              <button
+                className="secondary-button"
+                disabled={isLaunchingRun}
+                onClick={() => onStartRecommendedRun(recommendedRunPreset)}
+                type="button"
+              >
+                {isLaunchingRun ? 'Loading run...' : 'Start recommended run'}
+              </button>
             </div>
           </div>
 
@@ -308,6 +337,17 @@ export default function RecentRunsPanel({ onClear, runs }) {
                   {run.shuffleQuestions ? 'shuffled' : 'fixed order'}
                 </p>
                 <p className="history-copy">{dateFormatter.format(new Date(run.completedAt))}</p>
+
+                <div className="history-item-actions">
+                  <button
+                    className="ghost-button"
+                    disabled={isLaunchingRun}
+                    onClick={() => onReplayRun(run)}
+                    type="button"
+                  >
+                    {isLaunchingRun ? 'Loading run...' : 'Run this setup again'}
+                  </button>
+                </div>
               </article>
             ))}
           </div>
