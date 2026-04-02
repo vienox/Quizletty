@@ -102,6 +102,60 @@ export default function App() {
     ? stats?.totalQuestions ?? 1
     : stats?.categories?.find((item) => item.category === selectedCategory)?.questionCount ?? 1;
   const selectedCategoryTheme = getCategoryTheme(selectedCategory);
+  const categoryQuestionCounts = new Map(
+    (stats?.categories ?? []).map((item) => [item.category, item.questionCount])
+  );
+
+  function getQuestionCountForCategory(category) {
+    if (category === 'all') {
+      return stats?.totalQuestions ?? 1;
+    }
+
+    return categoryQuestionCounts.get(category) ?? 1;
+  }
+
+  function getAvailableCategory(preferredCategories) {
+    return preferredCategories.find((category) => categoryQuestionCounts.has(category)) ?? 'all';
+  }
+
+  const featuredQuizPacks = [
+    {
+      category: 'all',
+      eyebrow: 'Featured pack',
+      label: 'Starter mix',
+      questionLimit: Math.min(6, getQuestionCountForCategory('all')),
+      shuffleQuestions: true,
+      summary: 'A balanced pass across the full bank when you want a quick but varied session.',
+      detail: 'Good first run when you want to sample the whole app.'
+    },
+    {
+      category: getAvailableCategory(['Programming', 'Science', 'History']),
+      eyebrow: 'Featured pack',
+      label: 'Deep focus',
+      questionLimit: Math.min(8, getQuestionCountForCategory(getAvailableCategory(['Programming', 'Science', 'History']))),
+      shuffleQuestions: false,
+      summary: 'A denser single-category run with fewer context switches and steadier pacing.',
+      detail: 'Built for staying inside one lane and tightening recall.'
+    },
+    {
+      category: getAvailableCategory(['History', 'Literature', 'Art']),
+      eyebrow: 'Featured pack',
+      label: 'Storyline route',
+      questionLimit: Math.min(7, getQuestionCountForCategory(getAvailableCategory(['History', 'Literature', 'Art']))),
+      shuffleQuestions: false,
+      summary: 'A themed run centered on narrative, context and recognition across richer prompts.',
+      detail: 'Works well when you want a more classic knowledge run.'
+    },
+    {
+      category: getAvailableCategory(['Sports', 'Math', 'Music']),
+      eyebrow: 'Featured pack',
+      label: 'Fast reflex',
+      questionLimit: Math.min(7, getQuestionCountForCategory(getAvailableCategory(['Sports', 'Math', 'Music']))),
+      shuffleQuestions: true,
+      summary: 'Shorter questions, quicker choices and a sharper pace with random order turned on.',
+      detail: 'Best when you want a compact run with momentum.'
+    }
+  ];
   const quickStartPresets = [
     {
       category: 'all',
@@ -493,6 +547,52 @@ export default function App() {
                   onChange={(event) => setShuffleQuestions(event.target.checked)}
                   type="checkbox"
                 />
+              </div>
+
+              <div className="featured-pack-shell">
+                <div className="card-header">
+                  <p className="eyebrow">Featured quiz packs</p>
+                  <h2>Start from a ready-made run instead of building one from scratch.</h2>
+                </div>
+
+                <div className="featured-pack-grid">
+                  {featuredQuizPacks.map((pack) => {
+                    const packTheme = getCategoryTheme(pack.category);
+
+                    return (
+                      <button
+                        className="featured-pack-card"
+                        key={`${pack.label}-${pack.category}-${pack.questionLimit}`}
+                        onClick={() => applyQuickStartPreset(pack)}
+                        type="button"
+                      >
+                        <div
+                          className="featured-pack-artwork"
+                          style={{ backgroundImage: `url("${packTheme.artwork}")` }}
+                        />
+
+                        <div className="featured-pack-copy">
+                          <p className="eyebrow">{pack.eyebrow}</p>
+                          <h2>{pack.label}</h2>
+                          <p className="history-copy">{pack.summary}</p>
+                          <p className="history-copy">{pack.detail}</p>
+
+                          <div className="featured-pack-meta">
+                            <span className="review-status review-status-correct">
+                              {pack.category === 'all' ? 'Mixed run' : pack.category}
+                            </span>
+                            <span className="review-status review-status-correct">
+                              {pack.questionLimit} question{pack.questionLimit === 1 ? '' : 's'}
+                            </span>
+                            <span className="review-status review-status-correct">
+                              {pack.shuffleQuestions ? 'Shuffled' : 'Fixed order'}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="quick-start-grid">
