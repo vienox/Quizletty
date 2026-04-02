@@ -222,6 +222,81 @@ export default function App() {
       ...getCategoryTheme(item.category)
     })) ?? [])
   ];
+  const selectedRunCoverage = maxQuestions === 0
+    ? 0
+    : Math.round((questionLimit / maxQuestions) * 100);
+  const selectedBankLabel = maxQuestions >= 10
+    ? 'Deep bank'
+    : maxQuestions >= 6
+      ? 'Solid bank'
+      : 'Compact bank';
+  const selectedRunDepthLabel = selectedRunCoverage >= 80
+    ? 'Deep pass'
+    : selectedRunCoverage >= 50
+      ? 'Balanced pass'
+      : 'Compact pass';
+  const recommendedMode = selectedCategory === 'all'
+    ? {
+        label: 'Shuffled mix',
+        detail: 'Best for broad recall across multiple topics.'
+      }
+    : {
+        label: 'Fixed category drill',
+        detail: `Start ${selectedCategory} in sequence, then add shuffle once the lane feels stable.`
+      };
+  const selectedQuizGuidance = selectedCategory === 'all'
+    ? 'Use the mixed track when you want a quick read on what is holding up well across the whole bank.'
+    : `Stay inside ${selectedCategory} when you want fewer context switches and a cleaner repetition loop.`;
+  const selectedQuizActions = selectedCategory === 'all'
+    ? [
+        {
+          category: 'all',
+          label: 'Balanced mix',
+          questionLimit: Math.min(8, maxQuestions),
+          shuffleQuestions: true,
+          summary: 'Wider all-category run with random order for better spread.'
+        },
+        {
+          category: 'all',
+          label: 'Long review',
+          questionLimit: Math.min(12, maxQuestions),
+          shuffleQuestions: false,
+          summary: 'Longer mixed pass when you want a steadier review block.'
+        }
+      ]
+    : [
+        {
+          category: selectedCategory,
+          label: 'Short drill',
+          questionLimit: Math.min(5, maxQuestions),
+          shuffleQuestions: false,
+          summary: `Fast ${selectedCategory} run to tighten the core questions first.`
+        },
+        {
+          category: selectedCategory,
+          label: 'Full track pass',
+          questionLimit: Math.min(8, maxQuestions),
+          shuffleQuestions: false,
+          summary: `Use more of ${selectedCategory} in sequence for a deeper review.`
+        }
+      ];
+  const selectedQuizMetrics = [
+    {
+      label: 'Question bank',
+      value: `${maxQuestions}`,
+      detail: selectedBankLabel
+    },
+    {
+      label: 'Current slice',
+      value: `${selectedRunCoverage}%`,
+      detail: selectedRunDepthLabel
+    },
+    {
+      label: 'Recommended mode',
+      value: recommendedMode.label,
+      detail: selectedCategory === 'all' ? 'Across the full bank' : 'Inside one topic'
+    }
+  ];
 
   useEffect(() => {
     setQuestionLimit((current) => {
@@ -708,9 +783,40 @@ export default function App() {
                   <p className="helper-copy">
                     {selectedCategoryTheme.summary}
                   </p>
-                  <p className="history-copy">
-                    {maxQuestions} question{maxQuestions === 1 ? '' : 's'} available in this track.
-                  </p>
+
+                  <div className="category-focus-metrics">
+                    {selectedQuizMetrics.map((item) => (
+                      <article className="category-focus-metric" key={item.label}>
+                        <p className="highlight-label">{item.label}</p>
+                        <p className="highlight-value">{item.value}</p>
+                        <p className="history-copy">{item.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+
+                  <div className="category-focus-guidance">
+                    <p className="highlight-label">Best for</p>
+                    <p className="history-copy">{selectedQuizGuidance}</p>
+                    <p className="highlight-label">Recommended setup</p>
+                    <p className="history-copy">{recommendedMode.detail}</p>
+                  </div>
+
+                  <div className="category-focus-action-grid">
+                    {selectedQuizActions.map((preset) => (
+                      <button
+                        className="category-focus-action"
+                        key={`${preset.label}-${preset.category}-${preset.questionLimit}`}
+                        onClick={() => applyQuickStartPreset(preset)}
+                        type="button"
+                      >
+                        <p className="highlight-label">{preset.label}</p>
+                        <p className="highlight-value">
+                          {preset.questionLimit} question{preset.questionLimit === 1 ? '' : 's'}
+                        </p>
+                        <p className="history-copy">{preset.summary}</p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </article>
 
