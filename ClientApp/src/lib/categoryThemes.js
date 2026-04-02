@@ -35,6 +35,11 @@ const categoryThemes = {
     eyebrow: 'Places and maps',
     summary: 'Capitals, countries and global orientation for quick spatial recall.'
   },
+  History: {
+    artwork: buildArtwork('#7c2d12', '#b45309', '#fde68a'),
+    eyebrow: 'Timelines and turning points',
+    summary: 'Major events, leaders and civilizations for players who like context and sequence.'
+  },
   Literature: {
     artwork: buildArtwork('#7c2d12', '#c084fc', '#fde68a'),
     eyebrow: 'Stories and authors',
@@ -59,6 +64,11 @@ const categoryThemes = {
     artwork: buildArtwork('#0f766e', '#06b6d4', '#ccfbf1'),
     eyebrow: 'Systems and facts',
     summary: 'Chemistry, planets and natural rules that reward precise recall.'
+  },
+  Sports: {
+    artwork: buildArtwork('#166534', '#0ea5e9', '#fef08a'),
+    eyebrow: 'Rules and results',
+    summary: 'Team sports, iconic tournaments and quick-fire facts built for competitive runs.'
   }
 };
 

@@ -403,6 +403,78 @@ public static class DbSeeder
                     new() { Content = "Percussion", IsCorrect = false },
                     new() { Content = "Strings", IsCorrect = false }
                 }
+            },
+            new()
+            {
+                Content = "In which year did the Berlin Wall fall?",
+                Category = "History",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "1989", IsCorrect = true },
+                    new() { Content = "1979", IsCorrect = false },
+                    new() { Content = "1991", IsCorrect = false },
+                    new() { Content = "1969", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Who was the first President of the United States?",
+                Category = "History",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "George Washington", IsCorrect = true },
+                    new() { Content = "Thomas Jefferson", IsCorrect = false },
+                    new() { Content = "John Adams", IsCorrect = false },
+                    new() { Content = "Abraham Lincoln", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which civilization built Machu Picchu?",
+                Category = "History",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Inca", IsCorrect = true },
+                    new() { Content = "Maya", IsCorrect = false },
+                    new() { Content = "Aztec", IsCorrect = false },
+                    new() { Content = "Roman", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "How many players from one team are typically on the court in basketball?",
+                Category = "Sports",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "5", IsCorrect = true },
+                    new() { Content = "6", IsCorrect = false },
+                    new() { Content = "7", IsCorrect = false },
+                    new() { Content = "8", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which country won the FIFA World Cup in 2018?",
+                Category = "Sports",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "France", IsCorrect = true },
+                    new() { Content = "Croatia", IsCorrect = false },
+                    new() { Content = "Argentina", IsCorrect = false },
+                    new() { Content = "Brazil", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "What is the maximum score with one dart in standard darts?",
+                Category = "Sports",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "60", IsCorrect = true },
+                    new() { Content = "50", IsCorrect = false },
+                    new() { Content = "100", IsCorrect = false },
+                    new() { Content = "180", IsCorrect = false }
+                }
             }
         };
 
