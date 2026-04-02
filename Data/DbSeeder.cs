@@ -94,6 +94,30 @@ public static class DbSeeder
             },
             new()
             {
+                Content = "Which continent is the Sahara Desert located on?",
+                Category = "Geography",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Africa", IsCorrect = true },
+                    new() { Content = "Asia", IsCorrect = false },
+                    new() { Content = "Australia", IsCorrect = false },
+                    new() { Content = "South America", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which sea separates Europe and Africa?",
+                Category = "Geography",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Mediterranean Sea", IsCorrect = true },
+                    new() { Content = "Black Sea", IsCorrect = false },
+                    new() { Content = "Baltic Sea", IsCorrect = false },
+                    new() { Content = "Red Sea", IsCorrect = false }
+                }
+            },
+            new()
+            {
                 Content = "What gas do plants absorb from the atmosphere during photosynthesis?",
                 Category = "Science",
                 Answers = new List<Answer>
@@ -114,6 +138,30 @@ public static class DbSeeder
                     new() { Content = "Ag", IsCorrect = false },
                     new() { Content = "Gd", IsCorrect = false },
                     new() { Content = "Go", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "What part of the cell contains DNA in most organisms?",
+                Category = "Science",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Nucleus", IsCorrect = true },
+                    new() { Content = "Membrane", IsCorrect = false },
+                    new() { Content = "Cytoplasm", IsCorrect = false },
+                    new() { Content = "Ribosome", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "What is the process by which liquid water becomes vapor?",
+                Category = "Science",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Evaporation", IsCorrect = true },
+                    new() { Content = "Condensation", IsCorrect = false },
+                    new() { Content = "Freezing", IsCorrect = false },
+                    new() { Content = "Melting", IsCorrect = false }
                 }
             },
             new()
@@ -142,6 +190,30 @@ public static class DbSeeder
             },
             new()
             {
+                Content = "What is 15% of 200?",
+                Category = "Math",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "30", IsCorrect = true },
+                    new() { Content = "20", IsCorrect = false },
+                    new() { Content = "25", IsCorrect = false },
+                    new() { Content = "35", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "What is the value of pi rounded to two decimal places?",
+                Category = "Math",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "3.14", IsCorrect = true },
+                    new() { Content = "3.12", IsCorrect = false },
+                    new() { Content = "3.41", IsCorrect = false },
+                    new() { Content = "3.04", IsCorrect = false }
+                }
+            },
+            new()
+            {
                 Content = "Who wrote '1984'?",
                 Category = "Literature",
                 Answers = new List<Answer>
@@ -162,6 +234,30 @@ public static class DbSeeder
                     new() { Content = "The Odyssey", IsCorrect = false },
                     new() { Content = "The Great Gatsby", IsCorrect = false },
                     new() { Content = "Dracula", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Who wrote 'Pride and Prejudice'?",
+                Category = "Literature",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Jane Austen", IsCorrect = true },
+                    new() { Content = "Emily Bronte", IsCorrect = false },
+                    new() { Content = "Mary Shelley", IsCorrect = false },
+                    new() { Content = "Virginia Woolf", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which fictional detective lives at 221B Baker Street?",
+                Category = "Literature",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Sherlock Holmes", IsCorrect = true },
+                    new() { Content = "Hercule Poirot", IsCorrect = false },
+                    new() { Content = "Sam Spade", IsCorrect = false },
+                    new() { Content = "Philip Marlowe", IsCorrect = false }
                 }
             },
             new()
@@ -190,6 +286,30 @@ public static class DbSeeder
             },
             new()
             {
+                Content = "Which HTML tag is used to create a hyperlink?",
+                Category = "Programming",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "<a>", IsCorrect = true },
+                    new() { Content = "<link>", IsCorrect = false },
+                    new() { Content = "<href>", IsCorrect = false },
+                    new() { Content = "<nav>", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which SQL keyword is used to sort query results?",
+                Category = "Programming",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "ORDER BY", IsCorrect = true },
+                    new() { Content = "GROUP", IsCorrect = false },
+                    new() { Content = "FILTER", IsCorrect = false },
+                    new() { Content = "SELECT", IsCorrect = false }
+                }
+            },
+            new()
+            {
                 Content = "Which artist painted the ceiling of the Sistine Chapel?",
                 Category = "Art",
                 Answers = new List<Answer>
@@ -214,6 +334,30 @@ public static class DbSeeder
             },
             new()
             {
+                Content = "Which Dutch painter created 'The Starry Night'?",
+                Category = "Art",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Vincent van Gogh", IsCorrect = true },
+                    new() { Content = "Piet Mondrian", IsCorrect = false },
+                    new() { Content = "Johannes Vermeer", IsCorrect = false },
+                    new() { Content = "Rembrandt", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "What is the art of paper folding called?",
+                Category = "Art",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Origami", IsCorrect = true },
+                    new() { Content = "Calligraphy", IsCorrect = false },
+                    new() { Content = "Mosaic", IsCorrect = false },
+                    new() { Content = "Engraving", IsCorrect = false }
+                }
+            },
+            new()
+            {
                 Content = "Which instrument has 88 keys on a standard version?",
                 Category = "Music",
                 Answers = new List<Answer>
@@ -234,6 +378,30 @@ public static class DbSeeder
                     new() { Content = "Treble clef", IsCorrect = false },
                     new() { Content = "Alto clef", IsCorrect = false },
                     new() { Content = "Tenor clef", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "How many strings does a standard guitar typically have?",
+                Category = "Music",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "6", IsCorrect = true },
+                    new() { Content = "4", IsCorrect = false },
+                    new() { Content = "5", IsCorrect = false },
+                    new() { Content = "8", IsCorrect = false }
+                }
+            },
+            new()
+            {
+                Content = "Which family does the clarinet belong to?",
+                Category = "Music",
+                Answers = new List<Answer>
+                {
+                    new() { Content = "Woodwind", IsCorrect = true },
+                    new() { Content = "Brass", IsCorrect = false },
+                    new() { Content = "Percussion", IsCorrect = false },
+                    new() { Content = "Strings", IsCorrect = false }
                 }
             }
         };
