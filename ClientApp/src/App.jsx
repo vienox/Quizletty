@@ -35,9 +35,9 @@ export default function App() {
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
 
   const steps = [
-    'Pick a category or keep the full mix.',
-    'Start the session and answer one card at a time.',
-    'Review the score, category split and every correction.'
+    'Choose a featured pack or tune the setup yourself.',
+    'Move through the questions, answer calmly and flag anything worth revisiting.',
+    'Use the score, breakdown and follow-up suggestion to choose the next run.'
   ];
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function App() {
           return;
         }
 
-        setMetaError('Could not load quiz metadata from the API.');
+        setMetaError('Could not load the quiz setup right now.');
       } finally {
         if (isActive) {
           setIsLoadingMeta(false);
@@ -94,7 +94,7 @@ export default function App() {
     },
     {
       label: 'Mode',
-      value: metaError ? 'Offline' : 'Instant answer review'
+      value: metaError ? 'Unavailable' : 'Instant answer review'
     }
   ];
 
@@ -615,12 +615,12 @@ export default function App() {
         <header className="masthead">
           <div>
             <p className="eyebrow">Quizletty</p>
-            <h1>Run the quiz in one calm, focused flow.</h1>
+            <h1>Pick a lane and move through the quiz with focus.</h1>
           </div>
 
           <p className="masthead-copy">
-            Choose a topic, answer at your own pace and come back to clear,
-            useful feedback the moment the run is over.
+            Choose a ready-made pack or shape your own run, then come back to a clear score,
+            category breakdown and the next sensible step.
           </p>
         </header>
 
@@ -642,7 +642,7 @@ export default function App() {
               </div>
 
               <p className="status-chip">
-                {isLoadingMeta ? 'Loading metadata...' : metaError || 'Metadata ready'}
+                {isLoadingMeta ? 'Loading setup...' : metaError || 'Ready to start'}
               </p>
 
               <div className="field">
@@ -901,8 +901,8 @@ export default function App() {
 
               <article className="steps-card">
                 <div className="card-header">
-                  <p className="eyebrow">Roadmap</p>
-                  <h2>The full user path is already mapped.</h2>
+                  <p className="eyebrow">How it flows</p>
+                  <h2>The run stays simple from setup to review.</h2>
                 </div>
 
                 <ol className="steps-list">

@@ -164,12 +164,12 @@ export default function RecentRunsPanel({
     <article className="steps-card">
       <div className="card-header">
         <p className="eyebrow">Recent runs</p>
-        <h2>Your latest browser-side sessions.</h2>
+        <h2>Your latest saved runs.</h2>
       </div>
 
       {runs.length === 0 && (
         <p className="helper-copy">
-          Finish a quiz once and the latest scores will start appearing here.
+          Finish one run and the latest results will start appearing here.
         </p>
       )}
 

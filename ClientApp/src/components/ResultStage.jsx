@@ -56,8 +56,8 @@ export default function ResultStage({
         <p className="eyebrow">Session complete</p>
         <h2>{result.score} on the board.</h2>
         <p className="helper-copy">
-          The run is fully scored against the API and ready for a detailed
-          review, category analysis or quick summary sharing.
+          The run is scored and ready for a full review, a clearer category
+          read and a smart follow-up.
         </p>
       </article>
 
