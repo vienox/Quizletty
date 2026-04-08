@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import DailyChallengeCard from './components/DailyChallengeCard.jsx';
+import FavoriteSetupsCard from './components/FavoriteSetupsCard.jsx';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import ResumeDraftCard from './components/ResumeDraftCard.jsx';
 import TrainingSummaryCard from './components/TrainingSummaryCard.jsx';
@@ -7,6 +8,12 @@ import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
 import { getCategoryTheme } from './lib/categoryThemes.js';
+import {
+  hasFavoriteSetup,
+  loadFavoriteSetups,
+  removeFavoriteSetup,
+  saveFavoriteSetup
+} from './lib/favoriteSetups.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
@@ -34,6 +41,7 @@ export default function App() {
   const [submitError, setSubmitError] = useState('');
   const [result, setResult] = useState(null);
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
+  const [favoriteSetups, setFavoriteSetups] = useState(() => loadFavoriteSetups());
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
@@ -359,6 +367,11 @@ export default function App() {
         };
       })()
     : null;
+  const isCurrentSetupFavorite = hasFavoriteSetup(favoriteSetups, {
+    category: selectedCategory,
+    questionLimit,
+    shuffleQuestions
+  });
   const dailyChallenge = stats
     ? getDailyChallenge({
         categoryItems: stats.categories,
@@ -517,6 +530,15 @@ export default function App() {
     setSelectedCategory(normalizedPreset.category);
     setQuestionLimit(normalizedPreset.questionLimit);
     setShuffleQuestions(normalizedPreset.shuffleQuestions);
+  }
+
+  function toggleFavoriteSetupEntry(setup) {
+    if (hasFavoriteSetup(favoriteSetups, setup)) {
+      setFavoriteSetups(removeFavoriteSetup(setup));
+      return;
+    }
+
+    setFavoriteSetups(saveFavoriteSetup(setup));
   }
 
   async function handleSubmitQuiz() {
@@ -715,13 +737,12 @@ export default function App() {
                 <div className="featured-pack-grid">
                   {featuredQuizPacks.map((pack) => {
                     const packTheme = getCategoryTheme(pack.category);
+                    const isPackFavorite = hasFavoriteSetup(favoriteSetups, pack);
 
                     return (
-                      <button
+                      <article
                         className="featured-pack-card"
                         key={`${pack.label}-${pack.category}-${pack.questionLimit}`}
-                        onClick={() => applyQuickStartPreset(pack)}
-                        type="button"
                       >
                         <div
                           className="featured-pack-artwork"
@@ -745,8 +766,29 @@ export default function App() {
                               {pack.shuffleQuestions ? 'Shuffled' : 'Fixed order'}
                             </span>
                           </div>
+
+                          <div className="featured-pack-actions">
+                            <button
+                              className="secondary-button"
+                              onClick={() => applyQuickStartPreset(pack)}
+                              type="button"
+                            >
+                              Use this pack
+                            </button>
+
+                            <button
+                              className="ghost-button"
+                              onClick={() => toggleFavoriteSetupEntry({
+                                ...pack,
+                                summary: `${pack.summary} ${pack.questionLimit} question${pack.questionLimit === 1 ? '' : 's'} / ${pack.shuffleQuestions ? 'shuffled' : 'fixed order'}.`
+                              })}
+                              type="button"
+                            >
+                              {isPackFavorite ? 'Remove favorite' : 'Save pack'}
+                            </button>
+                          </div>
                         </div>
-                      </button>
+                      </article>
                     );
                   })}
                 </div>
@@ -899,6 +941,20 @@ export default function App() {
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    className="ghost-button"
+                    onClick={() => toggleFavoriteSetupEntry({
+                      category: selectedCategory,
+                      label: selectedCategory === 'all' ? 'Saved mixed setup' : `${selectedCategory} saved setup`,
+                      questionLimit,
+                      shuffleQuestions,
+                      summary: `${questionLimit} question${questionLimit === 1 ? '' : 's'} / ${shuffleQuestions ? 'shuffled' : 'fixed order'}`
+                    })}
+                    type="button"
+                  >
+                    {isCurrentSetupFavorite ? 'Remove from favorites' : 'Save current setup'}
+                  </button>
                 </div>
               </article>
 
@@ -911,6 +967,17 @@ export default function App() {
                 isLoading={isLoadingMeta || isLoadingQuestions}
                 onStartChallenge={(challenge) => {
                   startSessionWithSettings(challenge);
+                }}
+              />
+
+              <FavoriteSetupsCard
+                favoriteSetups={favoriteSetups}
+                isLaunchingRun={isLoadingQuestions}
+                onRemoveFavorite={(favoriteKey) => {
+                  setFavoriteSetups(removeFavoriteSetup(favoriteKey));
+                }}
+                onStartFavorite={(favoriteSetup) => {
+                  startSessionWithSettings(favoriteSetup);
                 }}
               />
 
