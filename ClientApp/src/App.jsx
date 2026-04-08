@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react';
+import DailyChallengeCard from './components/DailyChallengeCard.jsx';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import ResumeDraftCard from './components/ResumeDraftCard.jsx';
 import TrainingSummaryCard from './components/TrainingSummaryCard.jsx';
@@ -9,6 +10,7 @@ import { getCategoryTheme } from './lib/categoryThemes.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
+import { getDailyChallenge } from './lib/dailyChallenge.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
 
 export default function App() {
@@ -356,6 +358,13 @@ export default function App() {
           summary: `${Math.round(weakestCategory.accuracy * 100)}% accuracy in ${weakestCategory.category} makes it the clearest next follow-up.`
         };
       })()
+    : null;
+  const dailyChallenge = stats
+    ? getDailyChallenge({
+        categoryItems: stats.categories,
+        referenceDate: new Date(now),
+        totalQuestions: stats.totalQuestions
+      })
     : null;
 
   useEffect(() => {
@@ -897,6 +906,14 @@ export default function App() {
             </article>
 
             <div className="setup-side-column">
+              <DailyChallengeCard
+                challenge={dailyChallenge}
+                isLoading={isLoadingMeta || isLoadingQuestions}
+                onStartChallenge={(challenge) => {
+                  startSessionWithSettings(challenge);
+                }}
+              />
+
               <TrainingSummaryCard trainingStats={trainingStats} />
 
               {savedDraft && (
