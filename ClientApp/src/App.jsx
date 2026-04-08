@@ -125,6 +125,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const normalizedPath = normalizePathname(window.location.pathname);
+
+    if (window.location.pathname !== normalizedPath) {
+      window.history.replaceState({}, '', normalizedPath);
+      setPhase(getPhaseFromPathname(normalizedPath));
+    }
+
     function handlePopState() {
       setPhase(getPhaseFromPathname(window.location.pathname));
     }
