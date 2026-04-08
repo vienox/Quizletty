@@ -8,6 +8,7 @@ import { getCategoryTheme } from './lib/categoryThemes.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
+import { calculateTrainingStats } from './lib/trainingStats.js';
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
@@ -33,6 +34,7 @@ export default function App() {
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
+  const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
 
   const steps = [
     'Choose a featured pack or tune the setup yourself.',
@@ -95,6 +97,12 @@ export default function App() {
     {
       label: 'Mode',
       value: metaError ? 'Unavailable' : 'Instant answer review'
+    },
+    {
+      label: 'Streak',
+      value: trainingStats.totalRuns === 0
+        ? 'Start today'
+        : `${trainingStats.currentStreak}-day streak`
     }
   ];
 
