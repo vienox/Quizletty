@@ -186,6 +186,33 @@ select {
   border: 1px solid rgba(66, 42, 27, 0.08);
 }
 
+.training-summary-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.training-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.training-summary-item {
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.training-summary-footer {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, rgba(238, 248, 245, 0.95), rgba(255, 240, 226, 0.95));
+  border: 1px solid rgba(14, 118, 104, 0.14);
+}
+
 .history-breakdown-card {
   margin-bottom: 1rem;
   padding: 1rem 1.05rem;
@@ -982,6 +1009,10 @@ p {
   }
 
   .history-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .training-summary-grid {
     grid-template-columns: 1fr;
   }
 

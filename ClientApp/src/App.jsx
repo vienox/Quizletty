@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import ResumeDraftCard from './components/ResumeDraftCard.jsx';
+import TrainingSummaryCard from './components/TrainingSummaryCard.jsx';
 import QuestionStage from './components/QuestionStage.jsx';
 import ResultStage from './components/ResultStage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
@@ -896,6 +897,8 @@ export default function App() {
             </article>
 
             <div className="setup-side-column">
+              <TrainingSummaryCard trainingStats={trainingStats} />
+
               {savedDraft && (
                 <ResumeDraftCard
                   draft={savedDraft}
