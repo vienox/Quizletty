@@ -216,6 +216,36 @@ select {
   gap: 1rem;
 }
 
+.achievement-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.achievement-grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.achievement-item {
+  padding: 1rem 1.05rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(66, 42, 27, 0.08);
+}
+
+.achievement-item-unlocked {
+  background: linear-gradient(135deg, rgba(238, 248, 245, 0.95), rgba(255, 240, 226, 0.95));
+  border-color: rgba(14, 118, 104, 0.14);
+}
+
+.achievement-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.55rem;
+}
+
 .favorite-setup-list {
   display: grid;
   gap: 0.8rem;

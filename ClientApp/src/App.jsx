@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react';
+import AchievementBadgesCard from './components/AchievementBadgesCard.jsx';
 import DailyChallengeCard from './components/DailyChallengeCard.jsx';
 import FavoriteSetupsCard from './components/FavoriteSetupsCard.jsx';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
@@ -17,6 +18,7 @@ import {
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
 import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
+import { getAchievementBadges } from './lib/achievementBadges.js';
 import { getDailyChallenge } from './lib/dailyChallenge.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
 
@@ -46,6 +48,7 @@ export default function App() {
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
   const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
+  const achievementBadges = getAchievementBadges(recentRuns, trainingStats);
 
   const steps = [
     'Choose a featured pack or tune the setup yourself.',
@@ -982,6 +985,8 @@ export default function App() {
               />
 
               <TrainingSummaryCard trainingStats={trainingStats} />
+
+              <AchievementBadgesCard badges={achievementBadges} />
 
               {savedDraft && (
                 <ResumeDraftCard
