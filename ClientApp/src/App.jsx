@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useState } from 'react';
 import AchievementBadgesCard from './components/AchievementBadgesCard.jsx';
 import DailyChallengeCard from './components/DailyChallengeCard.jsx';
 import FavoriteSetupsCard from './components/FavoriteSetupsCard.jsx';
+import HomePage from './components/HomePage.jsx';
 import RecentRunsPanel from './components/RecentRunsPanel.jsx';
 import ResumeDraftCard from './components/ResumeDraftCard.jsx';
 import TrainingSummaryCard from './components/TrainingSummaryCard.jsx';
@@ -22,6 +23,29 @@ import { getAchievementBadges } from './lib/achievementBadges.js';
 import { getDailyChallenge } from './lib/dailyChallenge.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
 
+const phaseToPath = {
+  home: '/',
+  result: '/result',
+  setup: '/setup',
+  taking: '/session'
+};
+
+function normalizePathname(pathname) {
+  const normalizedPath = pathname !== '/' && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
+
+  return Object.values(phaseToPath).includes(normalizedPath)
+    ? normalizedPath
+    : '/';
+}
+
+function getPhaseFromPathname(pathname) {
+  const normalizedPath = normalizePathname(pathname);
+
+  return Object.entries(phaseToPath).find(([, value]) => value === normalizedPath)?.[0] ?? 'home';
+}
+
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
   const [now] = useState(() => new Date().toISOString());
@@ -34,7 +58,7 @@ export default function App() {
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [questionError, setQuestionError] = useState('');
-  const [phase, setPhase] = useState('setup');
+  const [phase, setPhase] = useState(() => getPhaseFromPathname(window.location.pathname));
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState({});
@@ -46,6 +70,7 @@ export default function App() {
   const [favoriteSetups, setFavoriteSetups] = useState(() => loadFavoriteSetups());
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
   const [showExitPrompt, setShowExitPrompt] = useState(false);
+  const [pendingNavigationPhase, setPendingNavigationPhase] = useState(null);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
   const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
   const achievementBadges = getAchievementBadges(recentRuns, trainingStats);
@@ -98,6 +123,30 @@ export default function App() {
       isActive = false;
     };
   }, []);
+
+  useEffect(() => {
+    function handlePopState() {
+      setPhase(getPhaseFromPathname(window.location.pathname));
+    }
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  function navigateToPhase(nextPhase, { replace = false } = {}) {
+    const nextPath = phaseToPath[nextPhase] ?? '/';
+
+    if (replace) {
+      window.history.replaceState({}, '', nextPath);
+    } else if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
+
+    setPhase(nextPhase);
+  }
 
   const highlights = [
     {
@@ -432,6 +481,21 @@ export default function App() {
     shuffleQuestions
   ]);
 
+  useEffect(() => {
+    if (phase === 'taking' && questions.length === 0 && !isLoadingQuestions) {
+      if (savedDraft?.questions?.length) {
+        resumeSavedDraft({ navigate: false });
+        return;
+      }
+
+      navigateToPhase('setup', { replace: true });
+    }
+
+    if (phase === 'result' && !result) {
+      navigateToPhase('setup', { replace: true });
+    }
+  }, [isLoadingQuestions, phase, questions.length, result, savedDraft]);
+
   async function startSessionWithSettings(settings) {
     const normalizedSettings = normalizeSessionSettings(settings);
 
@@ -456,7 +520,8 @@ export default function App() {
       setResult(null);
       setSubmitError('');
       setShowExitPrompt(false);
-      setPhase('taking');
+      setPendingNavigationPhase(null);
+      navigateToPhase('taking');
     } catch (error) {
       setQuestionError('Could not load questions for the selected setup.');
     } finally {
@@ -508,7 +573,7 @@ export default function App() {
     }
   }
 
-  function resumeSavedDraft() {
+  function resumeSavedDraft({ navigate = true } = {}) {
     if (!savedDraft) {
       return;
     }
@@ -524,7 +589,11 @@ export default function App() {
     setResult(null);
     setSubmitError('');
     setShowExitPrompt(false);
-    setPhase('taking');
+    setPendingNavigationPhase(null);
+
+    if (navigate) {
+      navigateToPhase('taking');
+    }
   }
 
   function applyQuickStartPreset(preset) {
@@ -575,12 +644,22 @@ export default function App() {
       setSavedDraft(null);
       setSessionStartedAt(null);
       setResult(submissionResult);
-      setPhase('result');
+      navigateToPhase('result');
     } catch (error) {
       setSubmitError('Could not score the quiz. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function requestNavigation(nextPhase) {
+    if (phase === 'taking') {
+      setPendingNavigationPhase(nextPhase);
+      setShowExitPrompt(true);
+      return;
+    }
+
+    navigateToPhase(nextPhase);
   }
 
   const currentQuestion = questions[activeQuestionIndex];
@@ -655,29 +734,47 @@ export default function App() {
       <div className="ambient ambient-right" />
 
       <section className="page-frame">
-        <header className="masthead">
-          <div>
-            <p className="eyebrow">Quizletty</p>
-            <h1>Pick a lane and move through the quiz with focus.</h1>
-          </div>
+        <header className="top-bar">
+          <button className="brand-link" onClick={() => requestNavigation('home')} type="button">
+            Quizletty
+          </button>
 
-          <p className="masthead-copy">
-            Choose a ready-made pack or shape your own run, then come back to a clear score,
-            category breakdown and the next sensible step.
-          </p>
+          {phase !== 'home' && (
+            <p className="top-bar-copy">
+              {phase === 'setup' ? 'Quiz builder' : phase === 'taking' ? 'Quiz session' : 'Results'}
+            </p>
+          )}
         </header>
 
-        <section className="highlight-grid">
-          {highlights.map((item) => (
-            <article className="highlight-card" key={item.label}>
-              <p className="highlight-label">{item.label}</p>
-              <p className="highlight-value">{item.value}</p>
-            </article>
-          ))}
-        </section>
+        {phase === 'home' && (
+          <HomePage
+            dailyChallenge={dailyChallenge}
+            highlights={highlights}
+            isLoadingChallenge={isLoadingMeta || isLoadingQuestions}
+            onOpenSetup={() => navigateToPhase('setup')}
+            onResumeDraft={() => resumeSavedDraft()}
+            onStartChallenge={(challenge) => {
+              startSessionWithSettings(challenge);
+            }}
+            savedDraft={savedDraft}
+            trainingStats={trainingStats}
+          />
+        )}
 
         {phase === 'setup' && (
-          <section className="workspace-grid">
+          <>
+            <section className="page-section-head">
+              <div>
+                <p className="eyebrow">Quiz builder</p>
+                <h1>Build the run on its own page.</h1>
+              </div>
+
+              <p className="masthead-copy">
+                Keep this screen for the full setup, saved shortcuts and deeper training controls.
+              </p>
+            </section>
+
+            <section className="workspace-grid">
             <article className="setup-card">
               <div className="card-header">
                 <p className="eyebrow">Session setup</p>
@@ -1031,7 +1128,8 @@ export default function App() {
                 runs={recentRuns}
               />
             </div>
-          </section>
+            </section>
+          </>
         )}
 
         {phase === 'taking' && currentQuestion && (
@@ -1049,7 +1147,7 @@ export default function App() {
             onJumpToNextUnanswered={() => {
               jumpToNextMatchingQuestion((item) => answers[item.id] === undefined);
             }}
-            onBackToSetup={() => setShowExitPrompt(true)}
+            onBackToSetup={() => requestNavigation('setup')}
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
@@ -1074,7 +1172,7 @@ export default function App() {
             followUpPreset={resultFollowUpPreset}
             isStartingFollowUp={isLoadingQuestions}
             onRestart={() => {
-              setPhase('setup');
+              navigateToPhase('setup');
               setQuestions([]);
               setAnswers({});
               setFlaggedQuestions({});
@@ -1097,13 +1195,22 @@ export default function App() {
           <section className="overlay-shell" role="dialog" aria-modal="true" aria-labelledby="exit-quiz-title">
             <article className="overlay-card">
               <p className="eyebrow">Leave quiz</p>
-              <h2 id="exit-quiz-title">Go back to setup?</h2>
+              <h2 id="exit-quiz-title">
+                {pendingNavigationPhase === 'home' ? 'Go back to the home page?' : 'Go back to setup?'}
+              </h2>
               <p className="helper-copy">
-                Your current progress stays saved as a draft, so you can come back later from the setup screen.
+                Your current progress stays saved as a draft, so you can come back later from the builder.
               </p>
 
               <div className="result-actions">
-                <button className="ghost-button result-button" onClick={() => setShowExitPrompt(false)} type="button">
+                <button
+                  className="ghost-button result-button"
+                  onClick={() => {
+                    setPendingNavigationPhase(null);
+                    setShowExitPrompt(false);
+                  }}
+                  type="button"
+                >
                   Keep solving
                 </button>
 
@@ -1111,11 +1218,12 @@ export default function App() {
                   className="primary-button result-button"
                   onClick={() => {
                     setShowExitPrompt(false);
-                    setPhase('setup');
+                    navigateToPhase(pendingNavigationPhase ?? 'setup');
+                    setPendingNavigationPhase(null);
                   }}
                   type="button"
                 >
-                  Leave to setup
+                  {pendingNavigationPhase === 'home' ? 'Leave to home' : 'Leave to setup'}
                 </button>
               </div>
             </article>
