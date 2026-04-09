@@ -18,29 +18,7 @@ import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/ses
 import { getAchievementBadges } from './lib/achievementBadges.js';
 import { getDailyChallenge } from './lib/dailyChallenge.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
-
-const phaseToPath = {
-  home: '/',
-  result: '/result',
-  setup: '/setup',
-  taking: '/session'
-};
-
-function normalizePathname(pathname) {
-  const normalizedPath = pathname !== '/' && pathname.endsWith('/')
-    ? pathname.slice(0, -1)
-    : pathname;
-
-  return Object.values(phaseToPath).includes(normalizedPath)
-    ? normalizedPath
-    : '/';
-}
-
-function getPhaseFromPathname(pathname) {
-  const normalizedPath = normalizePathname(pathname);
-
-  return Object.entries(phaseToPath).find(([, value]) => value === normalizedPath)?.[0] ?? 'home';
-}
+import useQuizNavigation from './hooks/useQuizNavigation.js';
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
@@ -54,7 +32,6 @@ export default function App() {
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
   const [questionError, setQuestionError] = useState('');
-  const [phase, setPhase] = useState(() => getPhaseFromPathname(window.location.pathname));
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [flaggedQuestions, setFlaggedQuestions] = useState({});
@@ -65,9 +42,17 @@ export default function App() {
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
   const [favoriteSetups, setFavoriteSetups] = useState(() => loadFavoriteSetups());
   const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
-  const [showExitPrompt, setShowExitPrompt] = useState(false);
-  const [pendingNavigationPhase, setPendingNavigationPhase] = useState(null);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
+  const {
+    confirmPendingNavigation,
+    pendingNavigationPhase,
+    phase,
+    phaseLabel,
+    navigateToPhase,
+    requestNavigation,
+    resetNavigationPrompt,
+    showExitPrompt
+  } = useQuizNavigation();
   const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
   const achievementBadges = getAchievementBadges(recentRuns, trainingStats);
 
@@ -119,37 +104,6 @@ export default function App() {
       isActive = false;
     };
   }, []);
-
-  useEffect(() => {
-    const normalizedPath = normalizePathname(window.location.pathname);
-
-    if (window.location.pathname !== normalizedPath) {
-      window.history.replaceState({}, '', normalizedPath);
-      setPhase(getPhaseFromPathname(normalizedPath));
-    }
-
-    function handlePopState() {
-      setPhase(getPhaseFromPathname(window.location.pathname));
-    }
-
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
-  function navigateToPhase(nextPhase, { replace = false } = {}) {
-    const nextPath = phaseToPath[nextPhase] ?? '/';
-
-    if (replace) {
-      window.history.replaceState({}, '', nextPath);
-    } else if (window.location.pathname !== nextPath) {
-      window.history.pushState({}, '', nextPath);
-    }
-
-    setPhase(nextPhase);
-  }
 
   const highlights = [
     {
@@ -522,8 +476,7 @@ export default function App() {
       setSessionStartedAt(new Date().toISOString());
       setResult(null);
       setSubmitError('');
-      setShowExitPrompt(false);
-      setPendingNavigationPhase(null);
+      resetNavigationPrompt();
       navigateToPhase('taking');
     } catch (error) {
       setQuestionError('Could not load questions for the selected setup.');
@@ -591,8 +544,7 @@ export default function App() {
     setSessionStartedAt(savedDraft.startedAt ?? savedDraft.savedAt ?? now);
     setResult(null);
     setSubmitError('');
-    setShowExitPrompt(false);
-    setPendingNavigationPhase(null);
+    resetNavigationPrompt();
 
     if (navigate) {
       navigateToPhase('taking');
@@ -655,16 +607,6 @@ export default function App() {
     }
   }
 
-  function requestNavigation(nextPhase) {
-    if (phase === 'taking') {
-      setPendingNavigationPhase(nextPhase);
-      setShowExitPrompt(true);
-      return;
-    }
-
-    navigateToPhase(nextPhase);
-  }
-
   const currentQuestion = questions[activeQuestionIndex];
   const answeredCount = Object.keys(answers).length;
   const isLastQuestion = activeQuestionIndex === questions.length - 1;
@@ -699,17 +641,6 @@ export default function App() {
     setSessionStartedAt(null);
     setResult(null);
     setActiveQuestionIndex(0);
-  }
-
-  function handleCancelExitPrompt() {
-    setPendingNavigationPhase(null);
-    setShowExitPrompt(false);
-  }
-
-  function handleConfirmExitPrompt() {
-    setShowExitPrompt(false);
-    navigateToPhase(pendingNavigationPhase ?? 'setup');
-    setPendingNavigationPhase(null);
   }
 
   function handleSaveCurrentSetup() {
@@ -792,12 +723,6 @@ export default function App() {
     };
   }, [phase]);
 
-  const phaseLabels = {
-    result: 'Results',
-    setup: 'Quiz builder',
-    taking: 'Quiz session'
-  };
-
   return (
     <main className="app-shell">
       <div className="ambient ambient-left" />
@@ -810,7 +735,7 @@ export default function App() {
           </button>
 
           {phase !== 'home' && (
-            <p className="top-bar-copy">{phaseLabels[phase]}</p>
+            <p className="top-bar-copy">{phaseLabel}</p>
           )}
         </header>
 
@@ -916,8 +841,8 @@ export default function App() {
         {showExitPrompt && (
           <LeaveSessionPrompt
             pendingNavigationPhase={pendingNavigationPhase}
-            onCancel={handleCancelExitPrompt}
-            onConfirm={handleConfirmExitPrompt}
+            onCancel={resetNavigationPrompt}
+            onConfirm={confirmPendingNavigation}
           />
         )}
       </section>
