@@ -4,7 +4,7 @@ import LeaveSessionPrompt from './components/LeaveSessionPrompt.jsx';
 import ResultPage from './components/ResultPage.jsx';
 import SessionPage from './components/SessionPage.jsx';
 import SetupPage from './components/SetupPage.jsx';
-import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
+import { getCategories, getStats } from './api/quizApi.js';
 import { getCategoryTheme } from './lib/categoryThemes.js';
 import {
   hasFavoriteSetup,
@@ -13,12 +13,12 @@ import {
   saveFavoriteSetup
 } from './lib/favoriteSetups.js';
 import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.js';
-import { clearRecentRuns, loadRecentRuns, saveRecentRun } from './lib/recentRuns.js';
-import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from './lib/sessionDraft.js';
+import { clearRecentRuns, loadRecentRuns } from './lib/recentRuns.js';
 import { getAchievementBadges } from './lib/achievementBadges.js';
 import { getDailyChallenge } from './lib/dailyChallenge.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
 import useQuizNavigation from './hooks/useQuizNavigation.js';
+import useQuizSession from './hooks/useQuizSession.js';
 
 export default function App() {
   const [storedPreferences] = useState(() => loadQuizPreferences());
@@ -30,19 +30,8 @@ export default function App() {
   const [shuffleQuestions, setShuffleQuestions] = useState(storedPreferences.shuffleQuestions);
   const [metaError, setMetaError] = useState('');
   const [isLoadingMeta, setIsLoadingMeta] = useState(true);
-  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
-  const [questionError, setQuestionError] = useState('');
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [flaggedQuestions, setFlaggedQuestions] = useState({});
-  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [result, setResult] = useState(null);
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
   const [favoriteSetups, setFavoriteSetups] = useState(() => loadFavoriteSetups());
-  const [savedDraft, setSavedDraft] = useState(() => loadSessionDraft());
-  const [sessionStartedAt, setSessionStartedAt] = useState(null);
   const {
     confirmPendingNavigation,
     pendingNavigationPhase,
@@ -338,6 +327,42 @@ export default function App() {
       detail: selectedCategory === 'all' ? 'Across the full bank' : 'Inside one topic'
     }
   ];
+  const {
+    activeQuestionIndex,
+    answers,
+    currentQuestion,
+    discardSavedDraft,
+    flaggedQuestions,
+    isLoadingQuestions,
+    isSubmitting,
+    jumpToNextMatchingQuestion,
+    questionError,
+    questions,
+    restartSession,
+    result,
+    resumeSavedDraft,
+    savedDraft,
+    sessionStartedAt,
+    setActiveQuestionIndex,
+    startSession,
+    startSessionWithSettings,
+    submitError,
+    submitSession,
+    toggleQuestionFlag,
+    handleSelectAnswer
+  } = useQuizSession({
+    navigateToPhase,
+    normalizeSessionSettings,
+    onRecentRunsChange: setRecentRuns,
+    phase,
+    questionLimit,
+    resetNavigationPrompt,
+    selectedCategory,
+    setQuestionLimit,
+    setSelectedCategory,
+    setShuffleQuestions,
+    shuffleQuestions
+  });
   const resultFollowUpPreset = result
     ? (() => {
         const rankedCategories = [...result.categories]
@@ -407,150 +432,6 @@ export default function App() {
     });
   }, [questionLimit, selectedCategory, shuffleQuestions]);
 
-  useEffect(() => {
-    if (phase !== 'taking' || questions.length === 0) {
-      return;
-    }
-
-    saveSessionDraft({
-      activeQuestionIndex,
-      answers,
-      flaggedQuestions,
-      questions,
-      savedAt: new Date().toISOString(),
-      startedAt: sessionStartedAt,
-      settings: {
-        questionLimit,
-        selectedCategory,
-        shuffleQuestions
-      }
-    });
-    setSavedDraft(loadSessionDraft());
-  }, [
-    activeQuestionIndex,
-    answers,
-    flaggedQuestions,
-    phase,
-    questionLimit,
-    questions,
-    selectedCategory,
-    sessionStartedAt,
-    shuffleQuestions
-  ]);
-
-  useEffect(() => {
-    if (phase === 'taking' && questions.length === 0 && !isLoadingQuestions) {
-      if (savedDraft?.questions?.length) {
-        resumeSavedDraft({ navigate: false });
-        return;
-      }
-
-      navigateToPhase('setup', { replace: true });
-    }
-
-    if (phase === 'result' && !result) {
-      navigateToPhase('setup', { replace: true });
-    }
-  }, [isLoadingQuestions, phase, questions.length, result, savedDraft]);
-
-  async function startSessionWithSettings(settings) {
-    const normalizedSettings = normalizeSessionSettings(settings);
-
-    setSelectedCategory(normalizedSettings.category);
-    setQuestionLimit(normalizedSettings.questionLimit);
-    setShuffleQuestions(normalizedSettings.shuffleQuestions);
-    setIsLoadingQuestions(true);
-    setQuestionError('');
-
-    try {
-      const questionItems = await getQuestions({
-        category: normalizedSettings.category,
-        limit: normalizedSettings.questionLimit,
-        shuffle: normalizedSettings.shuffleQuestions
-      });
-
-      setQuestions(questionItems);
-      setAnswers({});
-      setFlaggedQuestions({});
-      setActiveQuestionIndex(0);
-      setSessionStartedAt(new Date().toISOString());
-      setResult(null);
-      setSubmitError('');
-      resetNavigationPrompt();
-      navigateToPhase('taking');
-    } catch (error) {
-      setQuestionError('Could not load questions for the selected setup.');
-    } finally {
-      setIsLoadingQuestions(false);
-    }
-  }
-
-  async function startSession() {
-    await startSessionWithSettings({
-      category: selectedCategory,
-      questionLimit,
-      shuffleQuestions
-    });
-  }
-
-  function handleSelectAnswer(questionId, answerId) {
-    setAnswers((current) => ({
-      ...current,
-      [questionId]: answerId
-    }));
-  }
-
-  function toggleQuestionFlag(questionId) {
-    setFlaggedQuestions((current) => {
-      const nextFlags = { ...current };
-
-      if (nextFlags[questionId]) {
-        delete nextFlags[questionId];
-      } else {
-        nextFlags[questionId] = true;
-      }
-
-      return nextFlags;
-    });
-  }
-
-  function jumpToNextMatchingQuestion(predicate) {
-    if (questions.length === 0) {
-      return;
-    }
-
-    for (let offset = 1; offset <= questions.length; offset += 1) {
-      const candidateIndex = (activeQuestionIndex + offset) % questions.length;
-
-      if (predicate(questions[candidateIndex])) {
-        setActiveQuestionIndex(candidateIndex);
-        return;
-      }
-    }
-  }
-
-  function resumeSavedDraft({ navigate = true } = {}) {
-    if (!savedDraft) {
-      return;
-    }
-
-    setSelectedCategory(savedDraft.settings?.selectedCategory ?? 'all');
-    setQuestionLimit(savedDraft.settings?.questionLimit ?? savedDraft.questions.length);
-    setShuffleQuestions(savedDraft.settings?.shuffleQuestions ?? true);
-    setQuestions(savedDraft.questions);
-    setAnswers(savedDraft.answers ?? {});
-    setFlaggedQuestions(savedDraft.flaggedQuestions ?? {});
-    setActiveQuestionIndex(savedDraft.activeQuestionIndex ?? 0);
-    setSessionStartedAt(savedDraft.startedAt ?? savedDraft.savedAt ?? now);
-    setResult(null);
-    setSubmitError('');
-    resetNavigationPrompt();
-
-    if (navigate) {
-      navigateToPhase('taking');
-    }
-  }
-
   function applyQuickStartPreset(preset) {
     const normalizedPreset = normalizeSessionSettings(preset);
 
@@ -568,57 +449,12 @@ export default function App() {
     setFavoriteSetups(saveFavoriteSetup(setup));
   }
 
-  async function handleSubmitQuiz() {
-    setIsSubmitting(true);
-    setSubmitError('');
-
-    try {
-      const payload = {
-        answers: questions.map((question) => ({
-          questionId: question.id,
-          answerId: answers[question.id]
-        }))
-      };
-
-      const submissionResult = await submitQuiz(payload);
-      const historyEntry = {
-        categories: submissionResult.categories,
-        id: `${Date.now()}`,
-        category: selectedCategory,
-        completedAt: new Date().toISOString(),
-        correctAnswers: submissionResult.correctAnswers,
-        incorrectAnswers: submissionResult.incorrectAnswers,
-        percentage: submissionResult.percentage,
-        questionCount: questions.length,
-        score: submissionResult.score,
-        shuffleQuestions
-      };
-
-      setRecentRuns(saveRecentRun(historyEntry));
-      clearSessionDraft();
-      setSavedDraft(null);
-      setSessionStartedAt(null);
-      setResult(submissionResult);
-      navigateToPhase('result');
-    } catch (error) {
-      setSubmitError('Could not score the quiz. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  const currentQuestion = questions[activeQuestionIndex];
   const answeredCount = Object.keys(answers).length;
   const isLastQuestion = activeQuestionIndex === questions.length - 1;
 
   function handleClearRecentRuns() {
     clearRecentRuns();
     setRecentRuns([]);
-  }
-
-  function handleDiscardSavedDraft() {
-    clearSessionDraft();
-    setSavedDraft(null);
   }
 
   function handleRemoveFavorite(favoriteKey) {
@@ -631,16 +467,6 @@ export default function App() {
       questionLimit: run.questionCount,
       shuffleQuestions: run.shuffleQuestions
     });
-  }
-
-  function handleRestartQuiz() {
-    navigateToPhase('setup');
-    setQuestions([]);
-    setAnswers({});
-    setFlaggedQuestions({});
-    setSessionStartedAt(null);
-    setResult(null);
-    setActiveQuestionIndex(0);
   }
 
   function handleSaveCurrentSetup() {
@@ -697,7 +523,7 @@ export default function App() {
 
     if (event.key === 'Enter' && isLastQuestion && answeredCount === questions.length && !isSubmitting) {
       event.preventDefault();
-      handleSubmitQuiz();
+      submitSession();
       return;
     }
 
@@ -773,7 +599,7 @@ export default function App() {
             maxQuestions={maxQuestions}
             metaError={metaError}
             onClearRecentRuns={handleClearRecentRuns}
-            onDiscardDraft={handleDiscardSavedDraft}
+            onDiscardDraft={discardSavedDraft}
             onQuestionLimitChange={setQuestionLimit}
             onRemoveFavorite={handleRemoveFavorite}
             onReplayRun={handleReplayRun}
@@ -818,7 +644,7 @@ export default function App() {
             onMoveNext={() => setActiveQuestionIndex((current) => current + 1)}
             onMovePrevious={() => setActiveQuestionIndex((current) => current - 1)}
             onSelectAnswer={handleSelectAnswer}
-            onSubmit={handleSubmitQuiz}
+            onSubmit={submitSession}
             onToggleFlag={toggleQuestionFlag}
             questions={questions}
             selectedCategory={selectedCategory}
@@ -832,7 +658,7 @@ export default function App() {
           <ResultPage
             followUpPreset={resultFollowUpPreset}
             isStartingFollowUp={isLoadingQuestions}
-            onRestart={handleRestartQuiz}
+            onRestart={restartSession}
             onStartFollowUp={handleStartFollowUp}
             result={result}
           />
