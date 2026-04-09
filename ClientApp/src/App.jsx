@@ -5,6 +5,7 @@ import ResultPage from './components/ResultPage.jsx';
 import SessionPage from './components/SessionPage.jsx';
 import SetupPage from './components/SetupPage.jsx';
 import {
+  hasFavoriteSetup,
   loadFavoriteSetups,
   removeFavoriteSetup,
   saveFavoriteSetup
@@ -227,10 +228,7 @@ export default function App() {
             challengePresets={challengePresets}
             dailyChallenge={dailyChallenge}
             favoriteSetups={favoriteSetups}
-            featuredQuizPacks={featuredQuizPacks.map((pack) => ({
-              ...pack,
-              artwork: getCategoryTheme(pack.category).artwork
-            }))}
+            featuredQuizPacks={featuredQuizPacks}
             isCurrentSetupFavorite={isCurrentSetupFavorite}
             isLoadingMeta={isLoadingMeta}
             isLoadingQuestions={isLoadingQuestions}
