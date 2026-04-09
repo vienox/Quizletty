@@ -16,6 +16,7 @@ import { loadQuizPreferences, saveQuizPreferences } from './lib/quizPreferences.
 import { clearRecentRuns, loadRecentRuns } from './lib/recentRuns.js';
 import { getAchievementBadges } from './lib/achievementBadges.js';
 import { getDailyChallenge } from './lib/dailyChallenge.js';
+import { getResultFollowUpPreset } from './lib/resultFollowUp.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
 import useQuizNavigation from './hooks/useQuizNavigation.js';
 import useQuizSession from './hooks/useQuizSession.js';
@@ -363,44 +364,7 @@ export default function App() {
     setShuffleQuestions,
     shuffleQuestions
   });
-  const resultFollowUpPreset = result
-    ? (() => {
-        const rankedCategories = [...result.categories]
-          .map((item) => ({
-            ...item,
-            accuracy: item.totalQuestions === 0 ? 0 : item.correctAnswers / item.totalQuestions
-          }))
-          .sort((left, right) => {
-            if (left.accuracy !== right.accuracy) {
-              return left.accuracy - right.accuracy;
-            }
-
-            return right.totalQuestions - left.totalQuestions;
-          });
-        const weakestCategory = rankedCategories[0];
-
-        if (!weakestCategory) {
-          return {
-            category: 'all',
-            label: 'Run another mixed check',
-            questionLimit: Math.min(6, getQuestionCountForCategory('all')),
-            shuffleQuestions: true,
-            summary: 'Start another broad pass across the quiz bank.'
-          };
-        }
-
-        return {
-          category: weakestCategory.category,
-          label: `Drill ${weakestCategory.category}`,
-          questionLimit: Math.min(
-            Math.max(weakestCategory.totalQuestions, 4),
-            getQuestionCountForCategory(weakestCategory.category)
-          ),
-          shuffleQuestions: false,
-          summary: `${Math.round(weakestCategory.accuracy * 100)}% accuracy in ${weakestCategory.category} makes it the clearest next follow-up.`
-        };
-      })()
-    : null;
+  const resultFollowUpPreset = getResultFollowUpPreset(result, getQuestionCountForCategory);
   const isCurrentSetupFavorite = hasFavoriteSetup(favoriteSetups, {
     category: selectedCategory,
     questionLimit,
