@@ -1,13 +1,9 @@
 import { useEffect, useEffectEvent, useState } from 'react';
-import AchievementBadgesCard from './components/AchievementBadgesCard.jsx';
-import DailyChallengeCard from './components/DailyChallengeCard.jsx';
-import FavoriteSetupsCard from './components/FavoriteSetupsCard.jsx';
 import HomePage from './components/HomePage.jsx';
-import RecentRunsPanel from './components/RecentRunsPanel.jsx';
-import ResumeDraftCard from './components/ResumeDraftCard.jsx';
-import TrainingSummaryCard from './components/TrainingSummaryCard.jsx';
-import QuestionStage from './components/QuestionStage.jsx';
-import ResultStage from './components/ResultStage.jsx';
+import LeaveSessionPrompt from './components/LeaveSessionPrompt.jsx';
+import ResultPage from './components/ResultPage.jsx';
+import SessionPage from './components/SessionPage.jsx';
+import SetupPage from './components/SetupPage.jsx';
 import { getCategories, getQuestions, getStats, submitQuiz } from './api/quizApi.js';
 import { getCategoryTheme } from './lib/categoryThemes.js';
 import {
@@ -673,6 +669,67 @@ export default function App() {
   const answeredCount = Object.keys(answers).length;
   const isLastQuestion = activeQuestionIndex === questions.length - 1;
 
+  function handleClearRecentRuns() {
+    clearRecentRuns();
+    setRecentRuns([]);
+  }
+
+  function handleDiscardSavedDraft() {
+    clearSessionDraft();
+    setSavedDraft(null);
+  }
+
+  function handleRemoveFavorite(favoriteKey) {
+    setFavoriteSetups(removeFavoriteSetup(favoriteKey));
+  }
+
+  function handleReplayRun(run) {
+    startSessionWithSettings({
+      category: run.category,
+      questionLimit: run.questionCount,
+      shuffleQuestions: run.shuffleQuestions
+    });
+  }
+
+  function handleRestartQuiz() {
+    navigateToPhase('setup');
+    setQuestions([]);
+    setAnswers({});
+    setFlaggedQuestions({});
+    setSessionStartedAt(null);
+    setResult(null);
+    setActiveQuestionIndex(0);
+  }
+
+  function handleCancelExitPrompt() {
+    setPendingNavigationPhase(null);
+    setShowExitPrompt(false);
+  }
+
+  function handleConfirmExitPrompt() {
+    setShowExitPrompt(false);
+    navigateToPhase(pendingNavigationPhase ?? 'setup');
+    setPendingNavigationPhase(null);
+  }
+
+  function handleSaveCurrentSetup() {
+    toggleFavoriteSetupEntry({
+      category: selectedCategory,
+      label: selectedCategory === 'all' ? 'Saved mixed setup' : `${selectedCategory} saved setup`,
+      questionLimit,
+      shuffleQuestions,
+      summary: `${questionLimit} question${questionLimit === 1 ? '' : 's'} / ${shuffleQuestions ? 'shuffled' : 'fixed order'}`
+    });
+  }
+
+  function handleStartFollowUp() {
+    if (!resultFollowUpPreset) {
+      return;
+    }
+
+    startSessionWithSettings(resultFollowUpPreset);
+  }
+
   const handleKeyboardShortcuts = useEffectEvent((event) => {
     if (phase !== 'taking' || !currentQuestion) {
       return;
@@ -735,6 +792,12 @@ export default function App() {
     };
   }, [phase]);
 
+  const phaseLabels = {
+    result: 'Results',
+    setup: 'Quiz builder',
+    taking: 'Quiz session'
+  };
+
   return (
     <main className="app-shell">
       <div className="ambient ambient-left" />
@@ -747,9 +810,7 @@ export default function App() {
           </button>
 
           {phase !== 'home' && (
-            <p className="top-bar-copy">
-              {phase === 'setup' ? 'Quiz builder' : phase === 'taking' ? 'Quiz session' : 'Results'}
-            </p>
+            <p className="top-bar-copy">{phaseLabels[phase]}</p>
           )}
         </header>
 
