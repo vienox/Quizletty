@@ -4,8 +4,11 @@ export default function HomePage({
   dailyChallenge,
   highlights,
   isLoadingChallenge,
+  isStartingRun,
+  mistakeBankCount,
   onOpenSetup,
   onResumeDraft,
+  onStartMistakeBank,
   onStartChallenge,
   savedDraft,
   trainingStats
@@ -49,12 +52,31 @@ export default function HomePage({
               Open quiz builder
             </button>
 
+            <button
+              className="secondary-button"
+              disabled={mistakeBankCount === 0 || isStartingRun}
+              onClick={onStartMistakeBank}
+              type="button"
+            >
+              {isStartingRun
+                ? 'Loading mistake bank...'
+                : mistakeBankCount === 0
+                  ? 'Mistake bank empty'
+                  : `Retry mistakes (${mistakeBankCount})`}
+            </button>
+
             {savedDraft && (
               <button className="secondary-button" onClick={onResumeDraft} type="button">
                 Resume saved session
               </button>
             )}
           </div>
+
+          <p className="helper-copy">
+            {mistakeBankCount === 0
+              ? 'Miss a few questions and the mistake bank will queue them here for a focused retry run.'
+              : 'Launch the saved misses directly when you want a tighter corrective run.'}
+          </p>
 
           <div className="home-mini-stats">
             <article className="home-mini-stat">

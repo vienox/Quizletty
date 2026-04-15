@@ -2,6 +2,9 @@ export default function SetupCategoryChooserSection({
   applyQuickStartPreset,
   categoryCards,
   challengePresets,
+  isLaunchingRun,
+  mistakeBankCount,
+  onStartMistakeBank,
   onSelectCategory,
   quickStartPresets,
   selectedCategory,
@@ -9,6 +12,42 @@ export default function SetupCategoryChooserSection({
 }) {
   return (
     <>
+      <article className="history-recommendation-card">
+        <div className="card-header">
+          <p className="eyebrow">Mistake bank</p>
+          <h2>Retry the questions that already tripped you up.</h2>
+        </div>
+
+        <p className="history-copy">
+          {mistakeBankCount === 0
+            ? 'The retry queue is empty. Finish a run with a few missed answers and they will appear here.'
+            : `${mistakeBankCount} question${mistakeBankCount === 1 ? '' : 's'} are queued in mistake priority order for a corrective pass.`}
+        </p>
+
+        <div className="history-recommendation-tags">
+          <span className="review-status review-status-correct">
+            {mistakeBankCount} queued
+          </span>
+          <span className="review-status review-status-correct">Fixed order</span>
+          <span className="review-status review-status-correct">Focus retry</span>
+        </div>
+
+        <div className="history-item-actions">
+          <button
+            className="secondary-button"
+            disabled={mistakeBankCount === 0 || isLaunchingRun}
+            onClick={onStartMistakeBank}
+            type="button"
+          >
+            {isLaunchingRun
+              ? 'Loading mistake bank...'
+              : mistakeBankCount === 0
+                ? 'Mistake bank empty'
+                : 'Start retry mistakes run'}
+          </button>
+        </div>
+      </article>
+
       <div className="quick-start-grid">
         {quickStartPresets.map((preset) => (
           <button

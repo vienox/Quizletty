@@ -6,6 +6,11 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 export default function ResumeDraftCard({ draft, onDiscard, onResume }) {
   const answeredCount = Object.keys(draft.answers ?? {}).length;
   const flaggedCount = Object.keys(draft.flaggedQuestions ?? {}).length;
+  const draftLabel = draft.settings?.runLabel ?? (
+    draft.settings?.selectedCategory === 'all'
+      ? 'All categories'
+      : draft.settings?.selectedCategory ?? 'Mixed run'
+  );
 
   return (
     <article className="steps-card">
@@ -15,9 +20,7 @@ export default function ResumeDraftCard({ draft, onDiscard, onResume }) {
       </div>
 
       <p className="helper-copy">
-        {draft.settings?.selectedCategory === 'all'
-          ? 'All categories'
-          : draft.settings?.selectedCategory ?? 'Mixed run'}
+        {draftLabel}
         {' / '}
         {draft.questions.length} question{draft.questions.length === 1 ? '' : 's'}
         {' / '}

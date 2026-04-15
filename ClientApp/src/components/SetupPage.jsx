@@ -17,6 +17,7 @@ export default function SetupPage({
   isLoadingQuestions,
   maxQuestions,
   metaError,
+  mistakeBankCount,
   onClearRecentRuns,
   onDiscardDraft,
   onQuestionLimitChange,
@@ -26,6 +27,7 @@ export default function SetupPage({
   onSaveCurrentSetup,
   onSelectCategory,
   onShuffleQuestionsChange,
+  onStartMistakeBank,
   onStartChallenge,
   onStartFavorite,
   onStartRecommendedRun,
@@ -127,6 +129,9 @@ export default function SetupPage({
             applyQuickStartPreset={applyQuickStartPreset}
             categoryCards={categoryCards}
             challengePresets={challengePresets}
+            isLaunchingRun={isLoadingQuestions}
+            mistakeBankCount={mistakeBankCount}
+            onStartMistakeBank={onStartMistakeBank}
             onSelectCategory={onSelectCategory}
             quickStartPresets={quickStartPresets}
             selectedCategory={selectedCategory}

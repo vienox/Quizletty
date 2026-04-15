@@ -12,13 +12,24 @@ export default function RecentRunsPanel({
   onStartRecommendedRun,
   runs
 }) {
+  function isMistakeBankRun(run) {
+    return run.runType === 'mistake-bank';
+  }
+
+  function isMixedRun(run) {
+    return run.category === 'all' && !isMistakeBankRun(run);
+  }
+
   const availableFilters = [
     { label: 'All runs', value: 'all-runs' },
-    ...(runs.some((run) => run.category === 'all')
+    ...(runs.some((run) => isMistakeBankRun(run))
+      ? [{ label: 'Mistake bank', value: 'mistake-bank' }]
+      : []),
+    ...(runs.some((run) => isMixedRun(run))
       ? [{ label: 'Mixed only', value: 'mixed-runs' }]
       : []),
     ...[...new Set(runs
-      .filter((run) => run.category !== 'all')
+      .filter((run) => run.category !== 'all' && !isMistakeBankRun(run))
       .map((run) => run.category))]
       .sort()
       .map((category) => ({
@@ -39,8 +50,12 @@ export default function RecentRunsPanel({
       return true;
     }
 
+    if (historyFilter === 'mistake-bank') {
+      return isMistakeBankRun(run);
+    }
+
     if (historyFilter === 'mixed-runs') {
-      return run.category === 'all';
+      return isMixedRun(run);
     }
 
     return run.category === historyFilter.replace('category:', '');
@@ -138,7 +153,7 @@ export default function RecentRunsPanel({
       : 'Once you complete a few more runs, the dashboard will start suggesting a concrete training focus.';
 
   const recommendationSteps = [
-    filteredRuns.some((run) => run.category === 'all')
+    filteredRuns.some((run) => isMixedRun(run))
       ? 'Run one focused category session next to tighten weak spots faster.'
       : 'Run one mixed session next to test retention outside a single category.',
     trendDelta < 0
@@ -330,7 +345,11 @@ export default function RecentRunsPanel({
                 </p>
 
                 <p className="history-copy">
-                  {run.category === 'all' ? 'All categories' : run.category}
+                  {isMistakeBankRun(run)
+                    ? run.runLabel
+                    : run.category === 'all'
+                      ? 'All categories'
+                      : run.category}
                   {' / '}
                   {run.questionCount} question{run.questionCount === 1 ? '' : 's'}
                   {' / '}

@@ -98,6 +98,47 @@ public class QuizController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("questions/by-ids")]
+    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestionsByIds(
+        [FromQuery(Name = "ids")] List<int> ids,
+        [FromQuery] bool shuffle = false)
+    {
+        var sanitizedIds = ids
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList();
+
+        if (sanitizedIds.Count == 0)
+        {
+            return BadRequest("At least one positive question id must be provided.");
+        }
+
+        var questions = await _context.Questions
+            .AsNoTracking()
+            .Include(q => q.Answers)
+            .Where(q => sanitizedIds.Contains(q.Id))
+            .ToListAsync();
+
+        if (questions.Count == 0)
+        {
+            return Ok(Array.Empty<QuestionDto>());
+        }
+
+        var orderedQuestions = shuffle
+            ? questions.OrderBy(_ => Guid.NewGuid()).ToList()
+            : sanitizedIds
+                .Join(
+                    questions,
+                    id => id,
+                    question => question.Id,
+                    (_, question) => question)
+                .ToList();
+
+        var result = orderedQuestions.Select(MapQuestion);
+
+        return Ok(result);
+    }
+
     [HttpGet("questions/{id:int}")]
     public async Task<ActionResult<QuestionDto>> GetQuestionById(int id)
     {

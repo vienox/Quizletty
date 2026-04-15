@@ -29,6 +29,10 @@ export default function QuestionStage({
   const isReadyToSubmit = answeredCount === totalQuestions;
   const isFlagged = Boolean(flaggedQuestions[question.id]);
   const [elapsedLabel, setElapsedLabel] = useState('00:00');
+  const sessionLabel = sessionSettings.runLabel
+    ?? (sessionSettings.selectedCategory === 'all'
+      ? 'Mixed run'
+      : sessionSettings.selectedCategory);
 
   useEffect(() => {
     function updateElapsedLabel() {
@@ -97,12 +101,8 @@ export default function QuestionStage({
 
           <div className="session-meta-grid">
             <article className="session-meta-card">
-              <p className="highlight-label">Category</p>
-              <p className="session-meta-value">
-                {sessionSettings.selectedCategory === 'all'
-                  ? 'Mixed run'
-                  : sessionSettings.selectedCategory}
-              </p>
+              <p className="highlight-label">Track</p>
+              <p className="session-meta-value">{sessionLabel}</p>
             </article>
 
             <article className="session-meta-card">

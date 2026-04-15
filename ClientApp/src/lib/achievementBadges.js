@@ -1,7 +1,8 @@
 export function getAchievementBadges(runs, trainingStats) {
-  const mixedRunCount = runs.filter((run) => run.category === 'all').length;
+  const standardRuns = runs.filter((run) => run.runType !== 'mistake-bank');
+  const mixedRunCount = standardRuns.filter((run) => run.category === 'all').length;
   const focusedCategories = new Set(
-    runs
+    standardRuns
       .filter((run) => run.category !== 'all')
       .map((run) => run.category)
   );

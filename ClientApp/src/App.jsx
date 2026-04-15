@@ -54,6 +54,7 @@ export default function App() {
   } = useQuizNavigation();
   const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
   const achievementBadges = getAchievementBadges(recentRuns, trainingStats);
+  const mistakeBankQuestionIds = mistakeBank.map((entry) => entry.questionId);
 
   const steps = [
     'Choose a featured pack or tune the setup yourself.',
@@ -102,6 +103,7 @@ export default function App() {
     result,
     resumeSavedDraft,
     savedDraft,
+    activeSessionSettings,
     sessionStartedAt,
     setActiveQuestionIndex,
     startSession,
@@ -153,10 +155,35 @@ export default function App() {
   }
 
   function handleReplayRun(run) {
+    if (run.runType === 'mistake-bank' && run.questionIds.length > 0) {
+      startSessionWithSettings({
+        category: 'all',
+        questionIds: run.questionIds,
+        runLabel: run.runLabel ?? 'Mistake bank',
+        runType: 'mistake-bank',
+        shuffleQuestions: run.shuffleQuestions
+      });
+      return;
+    }
+
     startSessionWithSettings({
       category: run.category,
       questionLimit: run.questionCount,
       shuffleQuestions: run.shuffleQuestions
+    });
+  }
+
+  function handleStartMistakeBank() {
+    if (mistakeBankQuestionIds.length === 0) {
+      return;
+    }
+
+    startSessionWithSettings({
+      category: 'all',
+      questionIds: mistakeBankQuestionIds,
+      runLabel: 'Mistake bank',
+      runType: 'mistake-bank',
+      shuffleQuestions: false
     });
   }
 
@@ -213,8 +240,11 @@ export default function App() {
             dailyChallenge={dailyChallenge}
             highlights={highlights}
             isLoadingChallenge={isLoadingMeta || isLoadingQuestions}
+            isStartingRun={isLoadingQuestions}
+            mistakeBankCount={mistakeBank.length}
             onOpenSetup={() => navigateToPhase('setup')}
             onResumeDraft={() => resumeSavedDraft()}
+            onStartMistakeBank={handleStartMistakeBank}
             onStartChallenge={(challenge) => {
               startSessionWithSettings(challenge);
             }}
@@ -238,6 +268,7 @@ export default function App() {
             isLoadingQuestions={isLoadingQuestions}
             maxQuestions={maxQuestions}
             metaError={metaError}
+            mistakeBankCount={mistakeBank.length}
             onClearRecentRuns={handleClearRecentRuns}
             onDiscardDraft={discardSavedDraft}
             onQuestionLimitChange={setQuestionLimit}
@@ -247,6 +278,7 @@ export default function App() {
             onSaveCurrentSetup={handleSaveCurrentSetup}
             onSelectCategory={setSelectedCategory}
             onShuffleQuestionsChange={setShuffleQuestions}
+            onStartMistakeBank={handleStartMistakeBank}
             onStartChallenge={startSessionWithSettings}
             onStartFavorite={startSessionWithSettings}
             onStartRecommendedRun={startSessionWithSettings}
@@ -287,9 +319,8 @@ export default function App() {
             onSubmit={submitSession}
             onToggleFlag={toggleQuestionFlag}
             questions={questions}
-            selectedCategory={selectedCategory}
+            sessionSettings={activeSessionSettings}
             sessionStartedAt={sessionStartedAt}
-            shuffleQuestions={shuffleQuestions}
             submitError={submitError}
           />
         )}

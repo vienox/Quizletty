@@ -16,9 +16,8 @@ export default function SessionPage({
   onSubmit,
   onToggleFlag,
   questions,
-  selectedCategory,
+  sessionSettings,
   sessionStartedAt,
-  shuffleQuestions,
   submitError
 }) {
   if (!currentQuestion) {
@@ -46,9 +45,11 @@ export default function SessionPage({
       question={currentQuestion}
       sessionSettings={{
         flaggedCount: Object.keys(flaggedQuestions).length,
-        selectedCategory,
+        runLabel: sessionSettings?.runLabel,
+        runType: sessionSettings?.runType,
+        selectedCategory: sessionSettings?.selectedCategory ?? 'all',
         sessionStartedAt,
-        shuffleQuestions
+        shuffleQuestions: sessionSettings?.shuffleQuestions ?? false
       }}
       shortcutsEnabled
       submitError={submitError}
