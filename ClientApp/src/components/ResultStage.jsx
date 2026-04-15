@@ -4,11 +4,15 @@ export default function ResultStage({
   followUpPreset,
   isStartingFollowUp,
   onRestart,
+  onStartRetryMissed,
   onStartFollowUp,
   result
 }) {
   const [reviewFilter, setReviewFilter] = useState('all');
   const [copyState, setCopyState] = useState('idle');
+  const isMistakeBankRun = result.sessionSettings?.runType === 'mistake-bank';
+  const missedItems = result.review.filter((item) => !item.isCorrect);
+  const recoveredItems = result.review.filter((item) => item.isCorrect);
   const metrics = [
     { label: 'Correct', value: result.correctAnswers },
     { label: 'Incorrect', value: result.incorrectAnswers },
@@ -50,15 +54,22 @@ export default function ResultStage({
     }
   }
 
+  const heroCopy = isMistakeBankRun
+    ? missedItems.length === 0
+      ? 'Everything in this retry pass was recovered. The bank marked those questions as mastered for cleanup on the setup screen.'
+      : 'Recovered questions were marked as mastered. Anything missed again stays queued for the next corrective pass.'
+    : 'The run is scored and ready for a full review, a clearer category read and a smart follow-up.';
+  const retryTitle = isMistakeBankRun ? 'Retry the remaining misses' : 'Retry only the missed answers';
+  const retrySummary = isMistakeBankRun
+    ? `Launch another short pass with the ${missedItems.length} question${missedItems.length === 1 ? '' : 's'} that are still not stable.`
+    : `Start a focused correction pass with the ${missedItems.length} answer${missedItems.length === 1 ? '' : 's'} missed in this run.`;
+
   return (
     <section className="result-stage">
       <article className="result-hero">
         <p className="eyebrow">Session complete</p>
         <h2>{result.score} on the board.</h2>
-        <p className="helper-copy">
-          The run is scored and ready for a full review, a clearer category
-          read and a smart follow-up.
-        </p>
+        <p className="helper-copy">{heroCopy}</p>
       </article>
 
       <section className="result-metrics">
@@ -69,6 +80,61 @@ export default function ResultStage({
           </article>
         ))}
       </section>
+
+      {isMistakeBankRun && (
+        <article className="detail-card result-follow-up-card">
+          <div className="card-header">
+            <p className="eyebrow">Mistake bank sync</p>
+            <h2>See what changed in the retry queue.</h2>
+          </div>
+
+          <p className="helper-copy">
+            Correct answers from this retry run are marked as mastered, while repeated misses stay in the active queue.
+          </p>
+
+          <div className="result-follow-up-meta">
+            <span className="review-status review-status-correct">
+              {recoveredItems.length} mastered
+            </span>
+            <span className="review-status review-status-correct">
+              {missedItems.length} still queued
+            </span>
+            <span className="review-status review-status-correct">Setup screen cleanup</span>
+          </div>
+        </article>
+      )}
+
+      {missedItems.length > 0 && (
+        <article className="detail-card result-follow-up-card">
+          <div className="card-header">
+            <p className="eyebrow">Correction pass</p>
+            <h2>{retryTitle}</h2>
+          </div>
+
+          <p className="helper-copy">{retrySummary}</p>
+
+          <div className="result-follow-up-meta">
+            <span className="review-status review-status-wrong">
+              {missedItems.length} missed
+            </span>
+            <span className="review-status review-status-correct">Fixed order</span>
+            <span className="review-status review-status-correct">Focused retry</span>
+          </div>
+
+          <button
+            className="secondary-button result-button"
+            disabled={isStartingFollowUp}
+            onClick={onStartRetryMissed}
+            type="button"
+          >
+            {isStartingFollowUp
+              ? 'Loading correction pass...'
+              : isMistakeBankRun
+                ? 'Retry remaining misses'
+                : 'Retry missed answers'}
+          </button>
+        </article>
+      )}
 
       {followUpPreset && (
         <article className="detail-card result-follow-up-card">

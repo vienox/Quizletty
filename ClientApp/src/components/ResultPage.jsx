@@ -4,6 +4,7 @@ export default function ResultPage({
   followUpPreset,
   isStartingFollowUp,
   onRestart,
+  onStartRetryMissed,
   onStartFollowUp,
   result
 }) {
@@ -16,6 +17,7 @@ export default function ResultPage({
       followUpPreset={followUpPreset}
       isStartingFollowUp={isStartingFollowUp}
       onRestart={onRestart}
+      onStartRetryMissed={onStartRetryMissed}
       onStartFollowUp={onStartFollowUp}
       result={result}
     />

@@ -16,13 +16,16 @@ export default function SetupPage({
   isLoadingMeta,
   isLoadingQuestions,
   maxQuestions,
+  mistakeBankResolvedCount,
   metaError,
   mistakeBankCount,
+  onClearMistakeBank,
   onClearRecentRuns,
   onDiscardDraft,
   onQuestionLimitChange,
   onRemoveFavorite,
   onReplayRun,
+  onRemoveResolvedMistakes,
   onResumeDraft,
   onSaveCurrentSetup,
   onSelectCategory,
@@ -131,6 +134,9 @@ export default function SetupPage({
             challengePresets={challengePresets}
             isLaunchingRun={isLoadingQuestions}
             mistakeBankCount={mistakeBankCount}
+            mistakeBankResolvedCount={mistakeBankResolvedCount}
+            onClearMistakeBank={onClearMistakeBank}
+            onRemoveResolvedMistakes={onRemoveResolvedMistakes}
             onStartMistakeBank={onStartMistakeBank}
             onSelectCategory={onSelectCategory}
             quickStartPresets={quickStartPresets}

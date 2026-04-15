@@ -4,6 +4,9 @@ export default function SetupCategoryChooserSection({
   challengePresets,
   isLaunchingRun,
   mistakeBankCount,
+  mistakeBankResolvedCount,
+  onClearMistakeBank,
+  onRemoveResolvedMistakes,
   onStartMistakeBank,
   onSelectCategory,
   quickStartPresets,
@@ -20,7 +23,9 @@ export default function SetupCategoryChooserSection({
 
         <p className="history-copy">
           {mistakeBankCount === 0
-            ? 'The retry queue is empty. Finish a run with a few missed answers and they will appear here.'
+            ? mistakeBankResolvedCount > 0
+              ? `The active retry queue is empty. ${mistakeBankResolvedCount} mastered question${mistakeBankResolvedCount === 1 ? '' : 's'} are ready to clear.`
+              : 'The retry queue is empty. Finish a run with a few missed answers and they will appear here.'
             : `${mistakeBankCount} question${mistakeBankCount === 1 ? '' : 's'} are queued in mistake priority order for a corrective pass.`}
         </p>
 
@@ -28,8 +33,11 @@ export default function SetupCategoryChooserSection({
           <span className="review-status review-status-correct">
             {mistakeBankCount} queued
           </span>
+          <span className="review-status review-status-correct">
+            {mistakeBankResolvedCount} mastered
+          </span>
           <span className="review-status review-status-correct">Fixed order</span>
-          <span className="review-status review-status-correct">Focus retry</span>
+          <span className="review-status review-status-correct">Manual cleanup</span>
         </div>
 
         <div className="history-item-actions">
@@ -44,6 +52,24 @@ export default function SetupCategoryChooserSection({
               : mistakeBankCount === 0
                 ? 'Mistake bank empty'
                 : 'Start retry mistakes run'}
+          </button>
+
+          <button
+            className="ghost-button"
+            disabled={mistakeBankResolvedCount === 0}
+            onClick={onRemoveResolvedMistakes}
+            type="button"
+          >
+            {mistakeBankResolvedCount === 0 ? 'No mastered entries' : 'Remove mastered'}
+          </button>
+
+          <button
+            className="ghost-button"
+            disabled={mistakeBankCount + mistakeBankResolvedCount === 0}
+            onClick={onClearMistakeBank}
+            type="button"
+          >
+            Clear bank
           </button>
         </div>
       </article>

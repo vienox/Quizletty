@@ -12,7 +12,13 @@ import {
 } from './lib/favoriteSetups.js';
 import { clearRecentRuns, loadRecentRuns } from './lib/recentRuns.js';
 import { getAchievementBadges } from './lib/achievementBadges.js';
-import { loadMistakeBank } from './lib/mistakeBank.js';
+import {
+  clearMistakeBank,
+  getQueuedMistakeEntries,
+  getResolvedMistakeEntries,
+  loadMistakeBank,
+  removeResolvedMistakeEntries
+} from './lib/mistakeBank.js';
 import { getResultFollowUpPreset } from './lib/resultFollowUp.js';
 import { buildSetupViewModel } from './lib/setupViewModel.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
@@ -54,7 +60,9 @@ export default function App() {
   } = useQuizNavigation();
   const trainingStats = calculateTrainingStats(recentRuns, new Date(now));
   const achievementBadges = getAchievementBadges(recentRuns, trainingStats);
-  const mistakeBankQuestionIds = mistakeBank.map((entry) => entry.questionId);
+  const queuedMistakeBankEntries = getQueuedMistakeEntries(mistakeBank);
+  const resolvedMistakeBankEntries = getResolvedMistakeEntries(mistakeBank);
+  const mistakeBankQuestionIds = queuedMistakeBankEntries.map((entry) => entry.questionId);
 
   const steps = [
     'Choose a featured pack or tune the setup yourself.',
@@ -85,7 +93,7 @@ export default function App() {
     selectedCategory,
     shuffleQuestions,
     stats,
-    mistakeBankCount: mistakeBank.length,
+    mistakeBankCount: queuedMistakeBankEntries.length,
     trainingStats
   });
   const {
@@ -187,6 +195,34 @@ export default function App() {
     });
   }
 
+  function handleStartRetryMissed() {
+    const missedQuestionIds = result?.review
+      ?.filter((item) => !item.isCorrect)
+      .map((item) => item.questionId) ?? [];
+
+    if (missedQuestionIds.length === 0) {
+      return;
+    }
+
+    startSessionWithSettings({
+      category: 'all',
+      questionIds: missedQuestionIds,
+      runLabel: result?.sessionSettings?.runType === 'mistake-bank'
+        ? 'Retry remaining misses'
+        : 'Retry missed answers',
+      runType: 'mistake-bank',
+      shuffleQuestions: false
+    });
+  }
+
+  function handleClearMistakeBank() {
+    setMistakeBank(clearMistakeBank());
+  }
+
+  function handleRemoveResolvedMistakes() {
+    setMistakeBank(removeResolvedMistakeEntries());
+  }
+
   function handleSaveCurrentSetup() {
     toggleFavoriteSetupEntry({
       category: selectedCategory,
@@ -241,7 +277,7 @@ export default function App() {
             highlights={highlights}
             isLoadingChallenge={isLoadingMeta || isLoadingQuestions}
             isStartingRun={isLoadingQuestions}
-            mistakeBankCount={mistakeBank.length}
+            mistakeBankCount={queuedMistakeBankEntries.length}
             onOpenSetup={() => navigateToPhase('setup')}
             onResumeDraft={() => resumeSavedDraft()}
             onStartMistakeBank={handleStartMistakeBank}
@@ -267,12 +303,15 @@ export default function App() {
             isLoadingMeta={isLoadingMeta}
             isLoadingQuestions={isLoadingQuestions}
             maxQuestions={maxQuestions}
+            mistakeBankResolvedCount={resolvedMistakeBankEntries.length}
             metaError={metaError}
-            mistakeBankCount={mistakeBank.length}
+            mistakeBankCount={queuedMistakeBankEntries.length}
+            onClearMistakeBank={handleClearMistakeBank}
             onClearRecentRuns={handleClearRecentRuns}
             onDiscardDraft={discardSavedDraft}
             onQuestionLimitChange={setQuestionLimit}
             onRemoveFavorite={handleRemoveFavorite}
+            onRemoveResolvedMistakes={handleRemoveResolvedMistakes}
             onReplayRun={handleReplayRun}
             onResumeDraft={resumeSavedDraft}
             onSaveCurrentSetup={handleSaveCurrentSetup}
@@ -330,6 +369,7 @@ export default function App() {
             followUpPreset={resultFollowUpPreset}
             isStartingFollowUp={isLoadingQuestions}
             onRestart={restartSession}
+            onStartRetryMissed={handleStartRetryMissed}
             onStartFollowUp={handleStartFollowUp}
             result={result}
           />

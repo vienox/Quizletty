@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getQuestions, getQuestionsByIds, submitQuiz } from '../api/quizApi.js';
-import { saveMistakeBankEntries } from '../lib/mistakeBank.js';
+import { updateMistakeBankEntries } from '../lib/mistakeBank.js';
 import { saveRecentRun } from '../lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '../lib/sessionDraft.js';
 
@@ -270,6 +270,10 @@ export default function useQuizSession({
 
       const submissionResult = await submitQuiz(payload);
       const sessionSettings = activeSessionSettings ?? getDefaultSessionSettings();
+      const nextResult = {
+        ...submissionResult,
+        sessionSettings
+      };
       const historyEntry = {
         categories: submissionResult.categories,
         id: `${Date.now()}`,
@@ -288,13 +292,16 @@ export default function useQuizSession({
         shuffleQuestions: sessionSettings.shuffleQuestions
       };
 
-      onMistakeBankChange(saveMistakeBankEntries(submissionResult.review, completedAt));
+      onMistakeBankChange(updateMistakeBankEntries(submissionResult.review, {
+        completedAt,
+        resolveCorrectEntries: sessionSettings.runType === 'mistake-bank'
+      }));
       onRecentRunsChange(saveRecentRun(historyEntry));
       clearSessionDraft();
       setSavedDraft(null);
       setSessionStartedAt(null);
       setActiveSessionSettings(null);
-      setResult(submissionResult);
+      setResult(nextResult);
       navigateToPhase('result');
     } catch {
       setSubmitError('Could not score the quiz. Please try again.');
