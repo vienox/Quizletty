@@ -8,6 +8,7 @@ export function buildSetupViewModel({
   getQuestionCountForCategory,
   isLoadingMeta,
   metaError,
+  mistakeBankCount,
   now,
   questionLimit,
   selectedCategory,
@@ -25,8 +26,10 @@ export function buildSetupViewModel({
       value: isLoadingMeta ? 'Loading...' : `${stats?.totalCategories ?? 0} focus tracks`
     },
     {
-      label: 'Mode',
-      value: metaError ? 'Unavailable' : 'Instant answer review'
+      label: 'Mistake bank',
+      value: mistakeBankCount === 0
+        ? '0 queued'
+        : `${mistakeBankCount} queued question${mistakeBankCount === 1 ? '' : 's'}`
     },
     {
       label: 'Streak',

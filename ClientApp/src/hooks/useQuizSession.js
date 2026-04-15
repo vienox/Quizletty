@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getQuestions, submitQuiz } from '../api/quizApi.js';
+import { saveMistakeBankEntries } from '../lib/mistakeBank.js';
 import { saveRecentRun } from '../lib/recentRuns.js';
 import { clearSessionDraft, loadSessionDraft, saveSessionDraft } from '../lib/sessionDraft.js';
 
 export default function useQuizSession({
   navigateToPhase,
+  onMistakeBankChange,
   normalizeSessionSettings,
   onRecentRunsChange,
   phase,
@@ -182,6 +184,7 @@ export default function useQuizSession({
     setSubmitError('');
 
     try {
+      const completedAt = new Date().toISOString();
       const payload = {
         answers: questions.map((question) => ({
           questionId: question.id,
@@ -194,7 +197,7 @@ export default function useQuizSession({
         categories: submissionResult.categories,
         id: `${Date.now()}`,
         category: selectedCategory,
-        completedAt: new Date().toISOString(),
+        completedAt,
         correctAnswers: submissionResult.correctAnswers,
         incorrectAnswers: submissionResult.incorrectAnswers,
         percentage: submissionResult.percentage,
@@ -203,6 +206,7 @@ export default function useQuizSession({
         shuffleQuestions
       };
 
+      onMistakeBankChange(saveMistakeBankEntries(submissionResult.review, completedAt));
       onRecentRunsChange(saveRecentRun(historyEntry));
       clearSessionDraft();
       setSavedDraft(null);

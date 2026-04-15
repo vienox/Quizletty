@@ -12,6 +12,7 @@ import {
 } from './lib/favoriteSetups.js';
 import { clearRecentRuns, loadRecentRuns } from './lib/recentRuns.js';
 import { getAchievementBadges } from './lib/achievementBadges.js';
+import { loadMistakeBank } from './lib/mistakeBank.js';
 import { getResultFollowUpPreset } from './lib/resultFollowUp.js';
 import { buildSetupViewModel } from './lib/setupViewModel.js';
 import { calculateTrainingStats } from './lib/trainingStats.js';
@@ -22,6 +23,7 @@ import useSessionKeyboardShortcuts from './hooks/useSessionKeyboardShortcuts.js'
 
 export default function App() {
   const [now] = useState(() => new Date().toISOString());
+  const [mistakeBank, setMistakeBank] = useState(() => loadMistakeBank());
   const [recentRuns, setRecentRuns] = useState(() => loadRecentRuns());
   const [favoriteSetups, setFavoriteSetups] = useState(() => loadFavoriteSetups());
   const {
@@ -82,6 +84,7 @@ export default function App() {
     selectedCategory,
     shuffleQuestions,
     stats,
+    mistakeBankCount: mistakeBank.length,
     trainingStats
   });
   const {
@@ -109,6 +112,7 @@ export default function App() {
     handleSelectAnswer
   } = useQuizSession({
     navigateToPhase,
+    onMistakeBankChange: setMistakeBank,
     normalizeSessionSettings,
     onRecentRunsChange: setRecentRuns,
     phase,
